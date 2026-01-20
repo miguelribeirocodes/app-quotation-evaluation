@@ -1,3 +1,43 @@
+================================================================================
+QUOTATION EVALUATION SYSTEM
+================================================================================
+
+DESCRIÇÃO DO PROJETO
+Um sistema web full-stack para avaliação técnica e orçamentária de projetos de
+infraestrutura de redes. A aplicação permite que avaliadores preencham formulários
+detalhados sobre especificações técnicas, materiais necessários e cronogramas,
+gerando relatórios e PDFs para análise comercial.
+
+STACK TECNOLÓGICO
+Backend:  FastAPI (Python) + SQLAlchemy + PostgreSQL
+Frontend:  HTML5 + CSS3 + JavaScript (Vanilla)
+Autenticação: JWT + OAuth2
+Banco de Dados: PostgreSQL
+Deploy:  Backend em Render, Frontend em Netlify
+
+FUNCIONALIDADES PRINCIPAIS
+✓ Sistema de autenticação com 3 perfis de acesso (Admin, Comercial, Avaliador)
+✓ Formulários dinâmicos para avaliação de infraestrutura
+✓ Cálculo automático de quantitativos e materiais
+✓ Geração de PDFs com listas de materiais
+✓ Rascunho local (LocalStorage) para salvar progresso
+✓ Auditoria de alterações com histórico completo
+✓ Tabelas responsivas com filtros avançados
+
+CAMPOS DE AVALIAÇÃO
+- Q1: Cabeamento UTP e Patch Panel
+- Q2: Switches de rede
+- Q3: Cabeamento óptico e DIO
+- Q4: Equipamentos (Câmeras, NVR/DVR, etc)
+- Q5: Infraestrutura (Eletrocahas, Racks, etc)
+- Q6: Catracas e torniquetes
+- Q9: Painel de automação
+- Q10: Controle de acesso e portas
+
+================================================================================
+INÍCIO RÁPIDO
+================================================================================
+
 Como iniciar o venv:
 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
