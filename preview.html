@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quotation Evaluation System - Technical Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        section {
+            margin: 60px 0;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            color: #1d4ed8;
+            border-bottom: 3px solid #1d4ed8;
+            padding-bottom: 15px;
+            display: inline-block;
+        }
+
+        h3 {
+            font-size: 1.4em;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            color: #1e40af;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .tech-item {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #1d4ed8;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .tech-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.15);
+        }
+
+        .tech-item strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #1d4ed8;
+            font-size: 1.1em;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #dbeafe;
+            position: relative;
+        }
+
+        .feature-card::before {
+            content: "✓";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        .feature-card h4 {
+            margin-bottom: 10px;
+            color: #1e40af;
+            font-size: 1.1em;
+        }
+
+        .feature-card p {
+            font-size: 0.95em;
+            color: #666;
+        }
+
+        .evaluation-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .field-badge {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-weight: 500;
+            border-left: 4px solid #1d4ed8;
+        }
+
+        .roles-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .role-card {
+            border: 2px solid #dbeafe;
+            border-radius: 8px;
+            padding: 25px;
+            background: white;
+        }
+
+        .role-card h4 {
+            color: #1d4ed8;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dbeafe;
+        }
+
+        .role-card ul {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .role-card li {
+            padding: 8px 0;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .role-card li.allowed::before {
+            content: "✓ ";
+            color: #16a34a;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .role-card li.denied::before {
+            content: "✗ ";
+            color: #dc2626;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .setup-steps {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .setup-steps ol {
+            margin-left: 20px;
+            margin-top: 15px;
+        }
+
+        .setup-steps li {
+            margin: 15px 0;
+            color: #555;
+        }
+
+        .setup-steps code {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .codeblock {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        footer {
+            background: #1f2937;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 60px;
+        }
+
+        footer p {
+            margin: 8px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin: 5px;
+        }
+
+        .highlight {
+            background: #fef08a;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            .tech-stack,
+            .features-grid,
+            .roles-section {
+                grid-template-columns: 1fr;
+            }
+
+            section {
+                padding: 25px 15px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>📊 Quotation Evaluation System</h1>
+        <p>A comprehensive full-stack web application for technical and commercial evaluation of network infrastructure projects</p>
+    </header>
+
+    <div class="container">
+        <!-- Project Overview -->
+        <section>
+            <h2>Project Overview</h2>
+            <p>The <span class="highlight">Quotation Evaluation System</span> is a professional web application designed to streamline the evaluation process for network infrastructure projects. It enables evaluators to complete detailed forms about technical specifications, required materials, and timelines, automatically calculating quantities and generating comprehensive reports and PDFs for commercial analysis.</p>
+
+            <p style="margin-top: 20px;">This project demonstrates modern full-stack development practices with a clean separation of concerns, robust authentication, and a user-friendly interface suitable for complex business workflows.</p>
+        </section>
+
+        <!-- Tech Stack -->
+        <section>
+            <h2>Technology Stack</h2>
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <strong>Backend</strong>
+                    <p>FastAPI (Python)</p>
+                    <span class="badge">Python 3.x</span>
+                </div>
+                <div class="tech-item">
+                    <strong>API Architecture</strong>
+                    <p>REST API with JWT & OAuth2</p>
+                    <span class="badge">Authentication</span>
+                </div>
+                <div class="tech-item">
+                    <strong>Database</strong>
+                    <p>PostgreSQL</p>
+                    <span class="badge">SQLAlchemy ORM</span>
+                </div>
+                <div class="tech-item">
+                    <strong>Frontend</strong>
+                    <p>HTML5 + CSS3 + JavaScript</p>
+                    <span class="badge">Vanilla JS</span>
+                </div>
+                <div class="tech-item">
+                    <strong>Backend Deploy</strong>
+                    <p>Render</p>
+                    <span class="badge">Production</span>
+                </div>
+                <div class="tech-item">
+                    <strong>Frontend Deploy</strong>
+                    <p>Netlify</p>
+                    <span class="badge">Production</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Features -->
+        <section>
+            <h2>Key Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h4>Multi-Role Authentication</h4>
+                    <p>Three distinct user profiles (Admin, Commercial, Evaluator) with granular access control using JWT & OAuth2 authentication.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Dynamic Forms</h4>
+                    <p>Flexible evaluation forms for infrastructure assessment with real-time validation and error handling.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Automatic Calculations</h4>
+                    <p>Real-time calculation of quantities and material requirements based on evaluation data.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>PDF Generation</h4>
+                    <p>Automated generation of professional material lists and quotation reports in PDF format.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Local Draft Storage</h4>
+                    <p>Browser-based LocalStorage integration for saving progress and enabling offline work capabilities.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Audit & History</h4>
+                    <p>Complete change history tracking with audit logs for compliance and accountability.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Responsive Tables</h4>
+                    <p>Advanced filtering and sorting on responsive data tables optimized for mobile devices.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Image Management</h4>
+                    <p>Support for uploading and managing images related to evaluations and projects.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Evaluation Fields -->
+        <section>
+            <h2>Evaluation Categories</h2>
+            <p>The system supports comprehensive evaluation of network infrastructure across multiple categories:</p>
+            <div class="evaluation-fields">
+                <div class="field-badge">🔌 <strong>Q1:</strong> UTP Cabling & Patch Panels</div>
+                <div class="field-badge">🔀 <strong>Q2:</strong> Network Switches</div>
+                <div class="field-badge">📡 <strong>Q3:</strong> Optical Cabling & DIO</div>
+                <div class="field-badge">📹 <strong>Q4:</strong> Equipment (Cameras, NVR/DVR)</div>
+                <div class="field-badge">🏢 <strong>Q5:</strong> Infrastructure (Ducts, Racks)</div>
+                <div class="field-badge">🚪 <strong>Q6:</strong> Turnstiles & Barriers</div>
+                <div class="field-badge">⚙️ <strong>Q9:</strong> Automation Panel</div>
+                <div class="field-badge">🔑 <strong>Q10:</strong> Access Control & Doors</div>
+            </div>
+        </section>
+
+        <!-- User Roles & Permissions -->
+        <section>
+            <h2>User Roles & Access Control</h2>
+            <p>The system implements a three-tier role-based access control (RBAC) system:</p>
+
+            <div class="roles-section">
+                <!-- Admin Role -->
+                <div class="role-card">
+                    <h4>👨‍💼 Administrator</h4>
+                    <ul>
+                        <li class="allowed">Full system access</li>
+                        <li class="allowed">Create, edit, delete evaluations</li>
+                        <li class="allowed">Change evaluation status</li>
+                        <li class="allowed">Manage commercial fields</li>
+                        <li class="allowed">Create new users</li>
+                        <li class="allowed">Modify user roles</li>
+                        <li class="allowed">Activate/deactivate users</li>
+                        <li class="allowed">Reset user passwords</li>
+                        <li class="allowed">Access audit logs</li>
+                        <li class="allowed">Generate PDFs</li>
+                    </ul>
+                </div>
+
+                <!-- Commercial Role -->
+                <div class="role-card">
+                    <h4>💼 Commercial</h4>
+                    <ul>
+                        <li class="allowed">Create, edit, delete evaluations</li>
+                        <li class="allowed">Change evaluation status</li>
+                        <li class="allowed">Manage commercial fields</li>
+                        <li class="allowed">Generate PDFs</li>
+                        <li class="denied">Cannot manage users</li>
+                        <li class="denied">Cannot access audit logs</li>
+                    </ul>
+                </div>
+
+                <!-- Evaluator Role -->
+                <div class="role-card">
+                    <h4>📋 Evaluator</h4>
+                    <ul>
+                        <li class="allowed">Create evaluations</li>
+                        <li class="allowed">Edit own evaluations</li>
+                        <li class="allowed">View evaluations</li>
+                        <li class="allowed">Use local drafts (LocalStorage)</li>
+                        <li class="denied">Cannot change status</li>
+                        <li class="denied">Cannot fill commercial fields</li>
+                        <li class="denied">Cannot manage users</li>
+                        <li class="denied">Cannot access audit logs</li>
+                        <li class="denied">Cannot generate PDFs</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Start -->
+        <section>
+            <h2>Quick Start Guide</h2>
+
+            <h3>Prerequisites</h3>
+            <ul style="margin-left: 20px;">
+                <li>Python 3.x installed</li>
+                <li>PostgreSQL installed and running</li>
+                <li>Git for version control</li>
+            </ul>
+
+            <h3>Setup Steps</h3>
+            <div class="setup-steps">
+                <ol>
+                    <li>
+                        <strong>Clone the repository</strong>
+                        <div class="codeblock">git clone https://github.com/miguelribeirocodes/app-quotation-evaluation.git
+cd app-quotation-evaluation</div>
+                    </li>
+                    <li>
+                        <strong>Set up Python virtual environment</strong>
+                        <div class="codeblock"># Windows
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# macOS/Linux
+python3 -m venv .venv
+source .venv/bin/activate</div>
+                    </li>
+                    <li>
+                        <strong>Install dependencies</strong>
+                        <div class="codeblock">pip install -r requirements.txt
+pip install "python-jose[cryptography]" passlib[bcrypt]</div>
+                    </li>
+                    <li>
+                        <strong>Configure PostgreSQL database</strong>
+                        <p>Refer to the <code>readme.txt</code> file for detailed PostgreSQL setup instructions (6 steps included).</p>
+                    </li>
+                    <li>
+                        <strong>Set environment variables</strong>
+                        <p>Create a <code>.env</code> file in the project root:</p>
+                        <div class="codeblock">DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/postgres</div>
+                    </li>
+                    <li>
+                        <strong>Run the application</strong>
+                        <div class="codeblock">uvicorn main:app --reload</div>
+                    </li>
+                </ol>
+                <p style="margin-top: 20px;"><strong>Access the app:</strong> <code>http://localhost:8000</code></p>
+                <p><strong>Default credentials:</strong> Username: <code>admin</code> | Password: <code>admin123</code></p>
+                <p style="color: #dc2626; font-weight: bold;">⚠️ Change default password on first login!</p>
+            </div>
+
+            <h3>PostgreSQL Local Setup Summary</h3>
+            <p>The project includes a comprehensive PostgreSQL setup guide in <code>readme.txt</code> with:</p>
+            <ul style="margin-left: 20px; margin-top: 15px;">
+                <li>PostgreSQL download and installation instructions</li>
+                <li>Database creation steps</li>
+                <li>Schema initialization with SQL script</li>
+                <li>Connection verification</li>
+                <li>Troubleshooting tips</li>
+            </ul>
+        </section>
+
+        <!-- Project Structure -->
+        <section>
+            <h2>Project Structure</h2>
+            <div class="codeblock">
+app-quotation-evaluation/
+├── main.py                      # FastAPI application entry point
+├── requirements.txt             # Python dependencies
+├── schema_avaliacoes.sql        # Database schema definition
+├── .env                        # Environment variables (not in git)
+├── readme.txt                  # Comprehensive documentation
+│
+├── static/                     # Frontend assets
+│   ├── index.html             # Main application page
+│   ├── app.js                 # Main JavaScript logic (8,898 lines)
+│   ├── styles.css             # Styling
+│   ├── manifest.webmanifest   # PWA manifest
+│   ├── icons/                 # Application icons
+│   └── uploads/               # User-uploaded images
+│
+├── Deploy netlify/            # Production frontend build
+│   ├── index.html
+│   ├── app.js
+│   └── ...
+│
+└── .gitignore                 # Git ignore rules
+            </div>
+        </section>
+
+        <!-- Key Database Tables -->
+        <section>
+            <h2>Database Schema</h2>
+            <p>The system uses seven main tables for data persistence:</p>
+            <ul style="margin-left: 20px; margin-top: 15px;">
+                <li><strong>usuarios</strong> - User accounts with roles and permissions</li>
+                <li><strong>avaliacoes</strong> - Main evaluation records with status and metadata</li>
+                <li><strong>avaliacoes_imagens</strong> - Associated images for evaluations</li>
+                <li><strong>avaliacoes_equipamentos</strong> - Equipment specifications per evaluation</li>
+                <li><strong>avaliacoes_auditoria</strong> - Change history and audit logs</li>
+                <li><strong>avaliacoes_q2</strong> - Q2 specific evaluation data</li>
+                <li><strong>avaliacoes_q1</strong> - Q1 specific evaluation data</li>
+                <li><em>...and more specialized tables for each evaluation category</em></li>
+            </ul>
+            <p style="margin-top: 15px;">See <code>schema_avaliacoes.sql</code> for complete database schema definition.</p>
+        </section>
+
+        <!-- Deployment -->
+        <section>
+            <h2>Production Deployment</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h4>Backend (Render)</h4>
+                    <p>FastAPI backend deployed on Render with automatic deployments on git commits. Database uses Supabase PostgreSQL.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Frontend (Netlify)</h4>
+                    <p>Static HTML/CSS/JS frontend deployed on Netlify with automatic builds and live preview functionality.</p>
+                </div>
+            </div>
+            <p style="margin-top: 20px;"><strong>Live Application:</strong> <a href="https://quotation-evaluation.netlify.app/" target="_blank" style="color: #1d4ed8;">https://quotation-evaluation.netlify.app/</a></p>
+        </section>
+
+        <!-- Call to Action -->
+        <section style="background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%); text-align: center; border: 2px solid #1d4ed8;">
+            <h2 style="color: #1e40af;">Ready to Explore?</h2>
+            <p style="font-size: 1.1em; margin: 20px 0;">Check out the full source code and documentation on GitHub</p>
+            <div class="cta-buttons">
+                <a href="https://github.com/miguelribeirocodes/app-quotation-evaluation" class="btn btn-primary" target="_blank">View on GitHub</a>
+                <a href="https://quotation-evaluation.netlify.app/" class="btn btn-secondary" target="_blank">Try Live Demo</a>
+            </div>
+        </section>
+
+        <!-- Documentation Links -->
+        <section>
+            <h2>Documentation</h2>
+            <p>For detailed information, refer to these resources:</p>
+            <ul style="margin-left: 20px; margin-top: 15px;">
+                <li><strong>readme.txt</strong> - Project overview, setup guide, and troubleshooting</li>
+                <li><strong>schema_avaliacoes.sql</strong> - Complete database schema definition</li>
+                <li><strong>main.py</strong> - FastAPI application with API endpoints documentation</li>
+                <li><strong>static/app.js</strong> - Frontend application logic (8,898 lines of JavaScript)</li>
+            </ul>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p><strong>Quotation Evaluation System</strong> - Technical Portfolio Project</p>
+        <p>A modern full-stack application demonstrating professional web development practices</p>
+        <p style="margin-top: 20px; font-size: 0.9em; opacity: 0.8;">© 2025 Miguel Ribeiro | <a href="https://github.com/miguelribeirocodes" style="color: #1d4ed8; text-decoration: none;" target="_blank">GitHub Profile</a></p>
+    </footer>
+</body>
+</html>
