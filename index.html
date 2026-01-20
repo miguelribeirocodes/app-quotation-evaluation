@@ -1,0 +1,2795 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <!-- Define o conjunto de caracteres da página -->
+    <meta charset="UTF-8" />
+    <!-- Garante que o layout responda bem em telas menores -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Título exibido na aba do navegador -->
+    <title>Avaliações de Orçamentos - Technical Quotation Evaluation</title>
+    <!-- Link para o arquivo de estilos principal -->
+    <link rel="stylesheet" href="/static/styles.css" />
+        <!-- Ícone padrão (favicon) exibido na aba do navegador -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/static/icons/application-icon-32.png"
+    />
+
+    <!-- Ícone usado em atalhos e em alguns navegadores -->
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/static/icons/application-icon-180.png"
+    />
+
+    <!-- Arquivo de manifest para PWA (Android usa para ícone e nome do “app”) -->
+    <link
+      rel="manifest"                     
+      href="/static/manifest.webmanifest"
+    />
+
+    <!-- Cor da barra do navegador / barra de status (Android, alguns browsers) -->
+    <meta
+      name="theme-color"
+      content="#1d4ed8" 
+    />
+
+    <!-- Supabase JS Client (para upload de imagens no Storage) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- jsPDF para geração de PDF da lista de materiais -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- jsPDF-AutoTable para criar tabelas nos PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+  </head>
+  <body>
+    <!-- Contêiner raiz que vai alternar entre tela de login e tela principal -->
+    <div id="app-root">
+      <!-- ========================== TELA DE LOGIN ========================== -->
+      <section id="login-screen" class="screen">
+        <div class="login-wrapper">
+          <div class="login-card">
+            <div class="login-header">
+              <!-- Logo da Technical Quotation Evaluation -->
+              <div class = "login-logo-background">
+              <img
+                src="/static/logo_application.png"
+                alt="Logo Technical Quotation Evaluation"
+                class="login-logo"
+              />
+              </div>
+              <!-- Título da aplicação -->
+              <h1 class="login-title">Sistema de Avaliações Técnicas</h1>
+              <p class="login-subtitle">
+                Acesse com seu usuário Technical Quotation Evaluation para registrar e consultar
+                avaliações de instalações.
+              </p>
+            </div>
+
+            <!-- Formulário de login -->
+            <form id="login-form" class="login-form">
+              <div class="form-group">
+                <label for="login-username">Usuário</label>
+                <input
+                  type="text"
+                  id="login-username"
+                  autocomplete="username"
+                  placeholder="Seu usuário"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="login-password">Senha</label>
+                <input
+                  type="password"
+                  id="login-password"
+                  autocomplete="current-password"
+                  placeholder="Sua senha"
+                  required
+                />
+                <p id="login-capslock-warning" class="caps-warning hidden" aria-live="polite">
+                  Caps Lock ativado
+                </p>
+              </div>
+
+              <!-- Área para exibir erros de login -->
+              <p id="login-error" class="form-error" aria-live="polite"></p>
+
+              <button type="submit" id="btn-login" class="btn btn-primary btn-full">
+                Entrar
+              </button>
+
+              <!-- Separador visual -->
+              <div class="login-divider">
+                <span>ou</span>
+              </div>
+
+              <!-- Botão Entrar Offline -->
+              <button type="button" id="btn-login-offline" class="btn btn-outline btn-full">
+                📴 Entrar Offline
+              </button>
+
+              <!-- Guia explicativo do modo offline -->
+              <div class="offline-guide">
+                <div class="offline-guide-icon">ℹ️</div>
+                <div class="offline-guide-text">
+                  <strong>Modo Offline:</strong> Permite criar rascunhos sem conexão.
+                  Suas avaliações ficam salvas no dispositivo até você conectar ao servidor.
+                </div>
+              </div>
+
+              <p class="login-hint">
+                Primeiro acesso? O administrador cria seu usuário e, no primeiro
+                login, você será convidado a trocar a senha.
+              </p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================== TELA PRINCIPAL DO APP =================== -->
+      <section id="app-screen" class="screen hidden">
+        <!-- Barra superior com logo, título e usuário logado -->
+        <header class="topbar">
+          <div class="topbar-left">
+            <img
+              src="/static/logo_application.png"
+              alt="Logo Technical Quotation Evaluation"
+              class="topbar-logo"
+            />
+            <div class="topbar-text">
+              <h1>Avaliações de Orçamentos</h1>
+              <span>Registro técnico de instalações - Technical Quotation Evaluation</span>
+            </div>
+          </div>
+
+          <div class="topbar-right">
+            <!-- Badge de modo offline (oculto por padrão) -->
+            <span id="offline-badge" class="offline-badge hidden">OFFLINE</span>
+            
+              <div class="user-info">
+              <span id="user-name" class="user-name">Usuário</span>
+              <span id="user-role" class="user-role">Avaliador</span>
+            </div>
+            <button id="btnAuditoria" type="button" class="btn btn-primary btn-small">Auditoria</button>
+            <button id="btn-logout" class="btn btn-primary btn-small">
+              Sair
+            </button>
+          </div>
+        </header>
+
+        <!-- Conteúdo principal: lista + formulário -->
+        <main class="main-layout">        
+            <!-- ================== INÍCIO: SEÇÃO AUDITORIA ================== -->
+            <section id="sec-auditoria" class="app-section" style="display: none">
+            <!-- seção de auditoria, inicialmente oculta e exibida apenas para administradores -->
+            <main class="main-layout auditoria-layout">
+                <!-- contêiner principal da tela de auditoria, centralizado e com dois cards lado a lado em telas grandes -->
+                <section class="card card-compact">
+                <!-- card compacto que agrupa os controles e a tabela de auditoria de usuários -->
+                <div class="card-header">
+                    <!-- cabeçalho visual do card com título e subtítulo -->
+                    <div>
+                    <!-- bloco para alinhar título e subtítulo verticalmente -->
+                    <h2>Auditoria de Usuários</h2>
+                    <!-- título do card de auditoria de usuários -->
+                    <p class="card-subtitle">
+                        <!-- subtítulo explicando o objetivo deste card -->
+                        Consulte as ações realizadas sobre usuários do sistema.
+                        <!-- texto explicativo curto para dar contexto ao administrador -->
+                    </p>
+                    </div>
+                </div>
+                <!-- Filtros de Auditoria de Usuários -->
+                <div class="auditoria-filtros-container">
+                    <div class="form-row auditoria-filtros">
+                        <div class="form-group">
+                            <label for="audit-user-nome">Nome do usuário:</label>
+                            <input type="text" id="audit-user-nome" class="form-control" placeholder="Digite o nome...">
+                        </div>
+                        <div class="form-group">
+                            <label for="audit-user-email">E-mail:</label>
+                            <input type="text" id="audit-user-email" class="form-control" placeholder="Digite o e-mail...">
+                        </div>
+                    </div>
+                    <div class="form-row auditoria-filtros">
+                        <div class="form-group">
+                            <label for="audit-user-select">Usuário:</label>
+                            <select id="audit-user-select" class="form-control">
+                                <option value="">-- Selecione um usuário --</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="max-width: 180px">
+                            <label>&nbsp;</label>
+                            <button id="btn-load-user-audit" class="btn btn-primary btn-full">
+                                <i class="fas fa-search"></i> Carregar auditoria
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <!-- contêiner com rolagem que envolve a tabela de auditoria de usuários -->
+                    <table class="table tabela-auditoria">
+                    <!-- tabela de exibição dos registros de auditoria de usuários -->
+                    <thead>
+                        <!-- cabeçalho da tabela de auditoria de usuários -->
+                        <tr>
+                        <!-- linha do cabeçalho com as colunas principais -->
+                        <th>Data / Hora</th>
+                        <!-- coluna que mostra quando a ação ocorreu -->
+                        <th>Ação</th>
+                        <!-- coluna que descreve o tipo de ação realizada -->
+                        <th>Usuário alvo</th>
+                        <!-- coluna com o usuário que sofreu a ação -->
+                        <th>Usuário responsável</th>
+                        <!-- coluna com o usuário que executou a ação -->
+                        <th>Detalhes</th>
+                        <!-- coluna com detalhes adicionais da ação (JSON ou texto) -->
+                        </tr>
+                    </thead>
+                    <tbody id="audit-user-tbody">
+                        <!-- corpo da tabela onde as linhas de auditoria de usuários serão inseridas dinamicamente via JavaScript -->
+                        <tr><td colspan="5" class="text-muted text-center">Selecione um usuário e clique em "Carregar auditoria"</td></tr>
+                    </tbody>
+                    </table>
+                </div>
+                </section>
+
+                <section class="card card-compact">
+                <!-- card compacto que agrupa os controles e a tabela de auditoria de avaliações -->
+                <div class="card-header">
+                    <!-- cabeçalho visual do card de auditoria de avaliações -->
+                    <div>
+                    <!-- bloco vertical para alinhar título e subtítulo -->
+                    <h2>Auditoria de Avaliações</h2>
+                    <!-- título do card de auditoria de avaliações -->
+                    <p class="card-subtitle">
+                        <!-- subtítulo explicando o objetivo deste card -->
+                        Veja o histórico de alterações em cada avaliação técnica.
+                        <!-- texto curto que ajuda o usuário a entender o conteúdo do card -->
+                    </p>
+                    </div>
+                </div>
+                <!-- Filtros de Auditoria de Avaliações -->
+                <div class="auditoria-filtros-container">
+                    <div class="form-row auditoria-filtros">
+                        <div class="form-group">
+                            <label for="audit-avaliacao-codigo">Código:</label>
+                            <input type="text" id="audit-avaliacao-codigo" class="form-control" placeholder="Ex: AVT2025001">
+                        </div>
+                        <div class="form-group">
+                            <label for="audit-avaliacao-objeto">Objeto:</label>
+                            <input type="text" id="audit-avaliacao-objeto" class="form-control" placeholder="Digite o objeto...">
+                        </div>
+                    </div>
+                    <div class="form-row auditoria-filtros">
+                        <div class="form-group">
+                            <label for="audit-avaliacao-cliente">Cliente:</label>
+                            <input type="text" id="audit-avaliacao-cliente" class="form-control" placeholder="Nome do cliente...">
+                        </div>
+                        <div class="form-group">
+                            <label for="audit-avaliacao-data">Data da avaliação:</label>
+                            <input type="date" id="audit-avaliacao-data" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-row auditoria-filtros">
+                        <div class="form-group">
+                            <label for="audit-avaliacao-select">Avaliação:</label>
+                            <select id="audit-avaliacao-select" class="form-control">
+                                <option value="">-- Selecione uma avaliação --</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="max-width: 180px">
+                            <label>&nbsp;</label>
+                            <button id="btn-load-avaliacao-audit" class="btn btn-primary btn-full">
+                                <i class="fas fa-search"></i> Carregar auditoria
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <!-- contêiner com rolagem que envolve a tabela de auditoria de avaliações -->
+                    <table class="table tabela-auditoria">
+                    <!-- tabela responsável por exibir os registros de auditoria de avaliações -->
+                    <thead>
+                        <!-- cabeçalho da tabela de auditoria de avaliações -->
+                        <tr>
+                        <!-- linha de cabeçalho com as colunas principais -->
+                        <th>Data / Hora</th>
+                        <!-- coluna que mostra a data e a hora da ação sobre a avaliação -->
+                        <th>Ação</th>
+                        <!-- coluna que descreve a ação realizada (CRIAR, EDITAR, etc.) -->
+                        <th>Usuário</th>
+                        <!-- coluna com o usuário que realizou a ação (quando disponível) -->
+                        <th>Detalhes</th>
+                        <!-- coluna com informações adicionais da ação em formato de texto/JSON -->
+                        </tr>
+                    </thead>
+                    <tbody id="audit-avaliacao-tbody">
+                        <!-- corpo da tabela onde as linhas de auditoria de avaliações serão inseridas dinamicamente via JavaScript -->
+                        <tr><td colspan="4" class="text-muted text-center">Selecione uma avaliação e clique em "Carregar auditoria"</td></tr>
+                    </tbody>
+                    </table>
+                </div>
+                </section>
+            </main>
+            </section>
+          <!-- Coluna esquerda: lista de avaliações -->
+           <section
+            id="user-management-card"
+            class="card card-user-max card-users hidden"
+          >
+            <div class="card-header">
+              <div>
+                <h2>Gestão de Usuários</h2>
+                <p class="card-subtitle">
+                  Crie novos usuários para o sistema e visualize quem já possui acesso.
+                </p>
+              </div>
+            </div>
+
+            <!-- Formulário para criação de usuário -->
+            <form id="form-usuario" class="form-grid">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="usuario-nome">Nome completo *</label>
+                    <input
+                    type="text"
+                    id="usuario-nome"
+                    placeholder="Nome do avaliador"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="usuario-email">E-mail *</label>
+                  <input
+                    type="email"
+                    id="usuario-email"
+                    placeholder="email@empresa.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="usuario-username">Usuário (login) *</label>
+                  <input
+                    type="text"
+                    id="usuario-username"
+                    placeholder="login do usuário"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="usuario-senha">Senha inicial *</label>
+                  <input
+                    type="password"
+                    id="usuario-senha"
+                    placeholder="Senha provisória"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="usuario-role">Perfil do usuário *</label>
+                  <select id="usuario-role" required>
+                    <option value="avaliador">Avaliador</option>
+                    <option value="visualizador">Visualizador</option>
+                    <option value="comercial">Comercial</option>
+                    <option value="admin">Administrador</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Área para mensagens de erro/sucesso na criação de usuários -->
+              <p
+                id="usuario-feedback"
+                class="form-feedback"
+                aria-live="polite"
+              ></p>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                  Criar usuário
+                </button>
+              </div>
+            </form>
+
+            <!-- Tabela com usuários existentes -->
+            <div class="table-wrapper" style="margin-top: 14px;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Usuário</th>
+                    <th>E-mail</th>
+                    <th>Perfil / Troca de senha</th>
+                    <th>Alterar Perfil</th>
+                  </tr>
+                </thead>
+                <tbody id="usuarios-tbody">
+                  <tr>
+                    <td colspan="6" class="table-empty">
+                      Nenhum usuário carregado.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <section class="card card-list card-max">
+            <div class="card-header">
+              <div>
+                <h2>Avaliações Registradas</h2>
+                <p class="card-subtitle">
+                      Consulte as avaliações registradas e clique em uma linha para carregar os dados e editar.
+                </p>
+              </div>
+              <div class="card-header-actions">
+                <button id="btn-filtros-avaliacoes" class="btn btn-ghost" title="Mostrar/ocultar filtros">
+                  <i class="fas fa-filter"></i> Filtros
+                </button>
+                <button id="btn-recarregar" class="btn btn-ghost">
+                  Recarregar
+                </button>
+              </div>
+            </div>
+            <!-- Área de filtros (inicialmente oculta) -->
+            <div id="filtros-avaliacoes-container" class="filtros-avaliacoes-container" style="display: none;">
+              <div class="filtros-avaliacoes-grid">
+                <div class="form-group">
+                  <label for="filtro-codigo">Código</label>
+                  <input type="text" id="filtro-codigo" class="form-control" placeholder="Ex: AVT2025001">
+                </div>
+                <div class="form-group">
+                  <label for="filtro-cliente">Cliente</label>
+                  <input type="text" id="filtro-cliente" class="form-control" placeholder="Nome do cliente...">
+                </div>
+                <div class="form-group">
+                  <label for="filtro-objeto">Objeto</label>
+                  <input type="text" id="filtro-objeto" class="form-control" placeholder="Descrição do objeto...">
+                </div>
+                <div class="form-group">
+                  <label for="filtro-local">Local</label>
+                  <input type="text" id="filtro-local" class="form-control" placeholder="Cidade, endereço...">
+                </div>
+                <div class="form-group">
+                  <label for="filtro-criado-por">Criado por</label>
+                  <select id="filtro-criado-por" class="form-control">
+                    <option value="">-- Todos --</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="filtro-status">Status</label>
+                  <select id="filtro-status" class="form-control">
+                    <option value="">-- Todos --</option>
+                    <option value="aberto">Aberto</option>
+                    <option value="em_analise">Em análise</option>
+                    <option value="aprovado">Aprovado</option>
+                    <option value="reprovado">Reprovado</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="filtro-data">Data da avaliação</label>
+                  <input type="date" id="filtro-data" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label for="filtro-solicitante">Solicitante</label>
+                  <input type="text" id="filtro-solicitante" class="form-control" placeholder="Nome do solicitante...">
+                </div>
+                <div class="form-group">
+                  <label for="filtro-email">E-mail cliente</label>
+                  <input type="text" id="filtro-email" class="form-control" placeholder="email@exemplo.com">
+                </div>
+              </div>
+              <div class="filtros-avaliacoes-actions">
+                <button id="btn-limpar-filtros" class="btn btn-ghost">
+                  <i class="fas fa-times"></i> Limpar filtros
+                </button>
+                <button id="btn-aplicar-filtros" class="btn btn-primary">
+                  <i class="fas fa-search"></i> Aplicar filtros
+                </button>
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Objeto</th>
+                    <th>Cliente</th>
+                    <th>Data</th>
+                    <th>Local</th>
+                    <th>Status</th>
+                    <th>Criado por</th>
+                  </tr>
+                </thead>
+                <tbody id="avaliacoes-tbody">
+                  <tr>
+                    <td colspan="5" class="table-empty">
+                      Nenhuma avaliação encontrada.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <!-- Card de gestão de usuários - visível apenas para administradores -->
+
+          <section class="card card-list-rascunho rascunhos-collapsed card-max">
+            <div class="card-header rascunhos-header">
+              <button type="button" id="btn-toggle-rascunhos" class="rascunhos-toggle">
+                <div class="rascunhos-toggle-left">
+                  <h2>Rascunhos locais</h2>
+                  <p class="card-title">
+                    Rascunhos salvos apenas neste dispositivo e navegador, sem enviar nada para o servidor.
+                  </p>
+                </div>
+
+                <div class="rascunhos-toggle-right">
+                  <span id="rascunhos-count-badge" class="rascunhos-count-badge">
+                    0
+                  </span>
+                  <span id="rascunhos-chevron" class="rascunhos-chevron" aria-hidden="true">
+                    ▾
+                  </span>
+                </div>
+              </button>
+
+              <div class="rascunhos-header-actions">
+                <button id="btn-recarregar-rascunhos" class="btn btn-ghost btn-small">
+                  Recarregar
+                </button>
+
+                <button id="btn-limpar-rascunhos" class="btn btn-ghost btn-small">
+                  Limpar tudo
+                </button>
+              </div>
+            </div>
+
+            <div id="rascunhos-panel" class="rascunhos-panel">
+              <div class="table-wrapper">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Cliente / Rótulo</th>
+                      <th>Tipo</th>
+                      <th>Origem</th>
+                      <th>Atualizado em</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rascunhos-tbody">
+                    <tr>
+                      <td colspan="5" class="table-empty">
+                        Nenhum rascunho salvo neste dispositivo.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+
+          <!-- Coluna direita: formulário de nova avaliação -->
+          <section class="card card-form">
+                          <!-- Área de mensagens de erro/sucesso -->
+              <p
+                id="avaliacao-feedback"
+                class="form-feedback"
+                aria-live="polite"
+              ></p>
+            <div class="form-actions"> <!-- contêiner dos botões de ação do formulário -->
+                <div style="display: flex; width: 100%; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
+                  <button
+                    type="button"
+                    id="btn-gerar-lista-materiais"
+                    class="btn btn-primary"
+                    style="display: none;"
+                  >
+                    Gerar lista de materiais
+                  </button>
+                  <button
+                    type="button"
+                    id="btn-exportar-pdf"
+                    class="btn btn-primary"
+                    style="display: none;"
+                  >
+                    Exportar PDF
+                  </button>
+                  <button
+                    type="button"
+                    id="btn-nova-avaliacao"
+                    class="btn btn-primary"
+                  >
+                    Nova avaliação
+                  </button>
+                  <button
+                      type="button"
+                      id="btn-salvar-rascunho"
+                      class="btn btn-secondary"
+                  >
+                      Salvar rascunho
+                  </button>
+                  <button
+                      type="submit"
+                      id="btn-salvar-avaliacao"
+                      class="btn btn-primary"
+                  >
+                      Salvar avaliação
+                  </button>
+                </div>
+            </div>
+
+            <div class="card-header">
+              <h2 id="form-avaliacao-titulo">Nova Avaliação</h2> <!-- título do formulário, alterado pelo JS entre "Nova" e "Editar" -->
+              <p
+                  id="form-avaliacao-subtitulo"
+                  class="card-subtitle"
+              >
+                  Preencha os dados abaixo para registrar uma nova avaliação técnica.
+              </p>
+            </div>
+            <!--form-tipo-selector-container obsoleto-->
+            <div class="form-tipo-selector-container">
+              <div class="form-group">
+                <label for="tipo-formulario-select" class="tipo-selector-label">
+                  Selecione o tipo de formulário: 
+                </label>
+                <select id="tipo-formulario-select" required>
+                  <option value="utp_fibra">UTP e Fibra Óptica</option>
+                  <option value="cameras">Câmeras</option>
+                  <option value="controle_acesso">Controle de Acesso</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Formulário principal de avaliação -->
+            <form id="form-avaliacao" class="form-grid">
+              <input
+                type="hidden"
+                id="rascunho-id"
+                name="rascunho_id"
+                value=""
+              />
+              <!-- campo oculto que guarda o id do rascunho atualmente vinculado a este formulário -->
+              <input
+                type="hidden"
+                id="tipo-formulario"
+                value="utp_fibra"
+              /> <!-- campo hidden que armazena o tipo de formulário selecionado
+                    (utp_fibra/cameras; ainda aceita valores legados como "redes"/"infraestrutura") -->
+
+              <!-- Linha: cliente + data -->
+              <div class="form-row">
+                <div class="form-group"> <!-- grupo de campos relacionados ao cliente -->
+                  <label for="cliente-nome">Cliente *</label> <!-- rótulo principal do campo de cliente -->
+                  <select
+                    id="cliente-nome"                        
+                    required                                 
+                  >
+                    <option value="">Selecione...</option>   
+                    <option value="Novo Nordisk">Novo Nordisk</option> 
+                    <option value="FFEX">FFEX</option>       
+                    <option value="Somai">Somai</option>     
+                    <option value="União Química">União Química</option>
+                    <option value="CSN">CSN</option>         
+                    <option value="Alpargatas">Alpargatas</option>
+                    <option value="Eurofarma">Eurofarma</option> 
+                    <option value="Cristália">Cristália</option> 
+                    <option value="Santo Agostino">Santo Agostino</option>
+                    <option value="Cervantes">Cervantes</option>
+                    <option value="outro">Outro (especificar)</option>
+                  </select>
+                </div>
+
+                <div
+                    class="form-group invisible-keep-space"              
+                    id="cliente-outro-wrapper">
+                    <label for="cliente-nome-outro">Informe o nome do cliente</label> <!-- rótulo do campo "Outro" -->
+                    <input
+                      type="text"
+                      id="cliente-nome-outro"                
+                      placeholder="Digite o nome do cliente"
+                    />
+                </div>
+
+              </div>
+
+              <div class="form-row"> <!-- grupo de campos relacionados ao cliente -->
+
+                <div class="form-group">
+                  <label for="data-avaliacao">Data da avaliação *</label>
+                  <input
+                    type="date"
+                    id="data-avaliacao"
+                    required
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label for="local">Local</label>
+                  <input
+                    type="text"
+                    id="local"
+                    placeholder="Ex.: Local específico da instalação."
+                  />
+                </div>
+
+              </div>
+
+              <!-- Linha: status + equipe responsável -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="status">Status</label>
+                  <select id="status">
+                    <option value="aberto">Aberto</option>
+                    <option value="em_analise">Em análise</option>
+                    <option value="aprovado">Aprovado</option>
+                    <option value="reprovado">Reprovado</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Linha: Pedido de compra + Número da proposta (somente admin/comercial) -->
+              <div class="form-row" id="campos-comerciais-container">
+                <div class="form-group">
+                  <label for="pedido-compra">Pedido de Compra</label>
+                  <input
+                    type="text"
+                    id="pedido-compra"
+                    placeholder="Número do pedido de compra"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="numero-proposta">Número da Proposta</label>
+                  <input
+                    type="text"
+                    id="numero-proposta"
+                    placeholder="Número da proposta comercial"
+                  />
+                </div>
+              </div>
+
+              <!-- Linha: responsável + contato -->
+              <div class="form-row">
+
+                <div class="form-group">
+                  <label for="equipe">Equipe responsável pela execução</label>
+                  <select id="equipe">
+                    <option value="">Selecione...</option>
+                    <option value="Automação">Automação</option>
+                    <option value="Operacional">Operacional</option>
+                    <option value="Projetos">Projetos</option>
+                    <option value="Suporte">Suporte</option>
+                    <option value="Comercial">Comercial</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="responsavel-avaliacao"
+                    >Responsável pela avaliação</label
+                  >
+                  <input
+                    type="text"
+                    id="responsavel-avaliacao"
+                    placeholder="Nome do responsável técnico"
+                  />
+                </div>
+              </div>
+
+              <!-- Linha: e-mail -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="contato-cliente">Nome do solicitante</label>
+                  <input
+                    type="text"
+                    id="contato-cliente"
+                    placeholder="Nome/sobrenome"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="email-cliente">E-mail do cliente</label>
+                  <input
+                    type="email"
+                    id="email-cliente"
+                    placeholder="cliente@empresa.com"
+                  />
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="objeto">Objeto</label>
+                  <input
+                    type="text"
+                    id="objeto"
+                    placeholder="Resumo do objeto da avaliação"
+                    required
+                  />
+                </div>
+              </div>
+
+              <!-- Linha: escopo -->
+              <div class="form-row">
+                <div class="form-group full-width">
+                  <label for="escopo-texto">Escopo / Observações</label>
+                  <textarea
+                    id="escopo-texto"
+                    rows="4"
+                    placeholder="Descreva o escopo da avaliação ou observações importantes."
+                  ></textarea>
+                </div>
+              </div>
+              
+                            <!-- ====================== NOVAS SEÇÕES DA AVALIAÇÃO ====================== -->
+
+              <!-- Seção: flags gerais do serviço -->
+              <h3 class="form-section-title">Informações Gerais do Serviço</h3> <!-- título da seção de flags gerais do serviço -->
+
+              <div class="form-row"><!-- linha com flags de serviço -->
+                <div class="form-group"><!-- flag: serviço fora de Montes Claros -->
+                  <label for="servico-fora-montes-claros">Serviço fora de Montes Claros?</label> <!-- rótulo do campo -->
+                  <select id="servico-fora-montes-claros"><!-- select Sim/Não para serviço fora de Montes Claros -->
+                    <option value="">Selecione...</option> <!-- opção vazia padrão -->
+                    <option value="sim">Sim</option> <!-- marca como verdadeiro no JS -->
+                    <option value="nao">Não</option> <!-- marca como falso no JS -->
+                  </select>
+                </div>
+
+                <div class="form-group"><!-- flag: serviço para intermediário/empreiteira -->
+                  <label for="servico-intermediario">Serviço para intermediário / empreiteira?</label> <!-- rótulo do campo -->
+                  <select id="servico-intermediario"><!-- select Sim/Não para serviço intermediário -->
+                    <option value="">Selecione...</option> <!-- opção vazia padrão -->
+                    <option value="sim">Sim</option> <!-- valor que o JS converterá para true -->
+                    <option value="nao">Não</option> <!-- valor que o JS converterá para false -->
+                  </select>
+                </div>
+              </div>
+
+              <!-- ==================== SEÇÕES COMUNS (REDES + CÂMERAS) ==================== -->
+              <div class="tipo-redes-cameras-comum">
+
+              <!-- Seção: Quantitativo 01 - Patch Panel -->
+              <h3 class="form-section-title">Análise de Rack - Patch Panel</h3> <!-- título da seção de patch panel -->
+                <div class="form-row"><!-- linha com categoria, blindado e novo patch panel -->
+                  <div class="form-group"><!-- categoria do cabeamento -->
+                    <label for="q1-categoria-cab">Categoria do cabeamento</label> <!-- rótulo do campo -->
+                    <select id="q1-categoria-cab"><!-- select para categoria de cabo -->
+                      <option value="">Selecione...</option> <!-- opção vazia padrão -->
+                      <option value="CAT5e">CAT5e</option> <!-- categoria CAT5e -->
+                      <option value="CAT6">CAT6</option> <!-- categoria CAT6 -->
+                      <option value="CAT6A">CAT6A</option> <!-- categoria CAT6A -->
+                    </select>
+                  </div>
+
+                  <div class="form-group"><!-- flag: cabeamento blindado -->
+                    <label for="q1-blindado">Cabeamento blindado?</label> <!-- rótulo do campo -->
+                    <select id="q1-blindado"><!-- select Sim/Não para cabeamento blindado -->
+                      <option value="">Selecione...</option> <!-- opção vazia padrão -->
+                      <option value="sim">Sim</option> <!-- será convertido em true -->
+                      <option value="nao">Não</option> <!-- será convertido em false -->
+                    </select>
+                  </div>
+                </div>
+                <!-- linha com modelo do patch panel (aparece apenas se "Necessita novo patch panel?" = Sim) -->
+                <div class="form-row">
+                  <div class="form-group"><!-- flag: novo patch panel -->
+                    <label for="q1-novo-patch-panel">Necessita novo patch panel?</label> <!-- rótulo do campo -->
+                    <select id="q1-novo-patch-panel"><!-- select Sim/Não para novo patch panel -->
+                      <option value="">Selecione...</option> <!-- opção vazia padrão -->
+                      <option value="sim">Sim</option> <!-- indica necessidade de novo patch panel -->
+                      <option value="nao">Não</option> <!-- indica que não é necessário -->
+                    </select>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q1-modelo-patch-panel-wrapper">
+                      <label for="q1-modelo-patch-panel">Modelo do patch panel</label>
+                      <select id="q1-modelo-patch-panel"><!-- select com modelos de patch panel -->
+                        <option value="">Selecione...</option> <!-- opção vazia padrão -->
+                        <option value="CommScope 24 portas">CommScope 24 portas</option> <!-- modelo CommScope 24 portas -->
+                        <option value="Furukawa 24 portas">Furukawa 24 portas</option> <!-- modelo Furukawa 24 portas -->
+                        <option value="Systimax 24 portas">Systimax 24 portas</option> <!-- modelo Systimax 24 portas -->
+                        <option value="outro">Outro (especificar)</option> <!-- opção para informar outro modelo -->
+                      </select>
+                  </div>
+
+                  <div class="form-group invisible-keep-space" id="q1-modelo-patch-panel-outro-wrapper">
+                      <label for="q1-modelo-patch-panel-outro">Informe o modelo</label> <!-- rótulo do campo "Outro" -->
+                      <input
+                        type="text"                                     
+                        id="q1-modelo-patch-panel-outro"                
+                        placeholder="Digite o modelo do patch panel"    
+                      />
+                  </div>
+                </div>
+                <div class="form-row"><!-- linha com incluir guia e quantitativos de rede -->
+                  <div class="form-group"><!-- flag: incluir guia -->
+                    <label for="q1-incluir-guia">Incluir guia de cabos?</label> <!-- rótulo do campo -->
+                    <select id="q1-incluir-guia"><!-- select Sim/Não para guia de cabos -->
+                      <option value="">Selecione...</option> <!-- opção vazia padrão -->
+                      <option value="sim">Sim</option> <!-- guia será considerado -->
+                      <option value="nao">Não</option> <!-- guia não será considerado -->
+                    </select>
+                  </div>                  
+                                    <!-- quantidade de guias de cabos (visível somente quando "Incluir guia de cabos?" = Sim) -->
+                  <div class="form-group invisible-keep-space" id="q1-qtd-guias-cabos-wrapper">
+                    <label for="q1-qtd-guias-cabos">Qtd. de guias de cabos</label>
+                    <input
+                      type="number"
+                      id="q1-qtd-guias-cabos"
+                      min="0"
+                      step="1"
+                      placeholder="Ex.: 2"
+                    />
+                  </div>
+
+                </div>
+
+                <div class="form-row"><!-- linha com portas de patch panel e patch cords -->
+                  <div class="form-group"><!-- quantidade de portas em patch panel -->
+                    <label for="q1-qtd-portas-patch-panel">Qtd. de portas no patch panel</label>
+                    <input
+                      type="number"
+                      id="q1-qtd-portas-patch-panel"
+                      min="0"
+                      step="1"
+                      placeholder="Ex.: 24"
+                    />
+                  </div>
+
+                  <div class="form-group"><!-- quantidade de patch cords -->
+                    <label for="q1-qtd-patch-cords">Qtd. de patch cords</label>
+                    <input
+                      type="number"
+                      id="q1-qtd-patch-cords"
+                      min="0"
+                      step="1"
+                      placeholder="Ex.: 24"
+                    />
+                  </div>
+
+                  <div class="form-group"><!-- quantidade de pontos de rede -->
+                    <label for="q1-qtd-pontos-rede">Qtd. de pontos de rede</label>
+                    <input
+                      type="number"
+                      id="q1-qtd-pontos-rede"
+                      min="0"
+                      step="1"
+                      placeholder="Ex.: 24"
+                    />
+                  </div>
+
+                  <div class="form-group"><!-- quantidade de cabos -->
+                    <label for="q1-qtd-cabos">Qtd. de cabos</label>
+                    <input
+                      type="number"
+                      id="q1-qtd-cabos"
+                      min="0"
+                      step="1"
+                      placeholder="Ex.: 24"
+                    />
+                  </div>
+                </div>
+
+                <!-- linha com marca do cabeamento (select + "Outro") e modelo do patch panel antigo -->
+                <div class="form-row"><!-- linha agrupando marca do cabeamento e modelo antigo -->
+                  <div class="form-group"><!-- marca do cabeamento UTP (CommScope / Furukawa / Outro) -->
+                    <label for="q1-marca-cab">Marca do cabeamento</label> <!-- rótulo do campo de marca -->
+                    <select id="q1-marca-cab"><!-- select com as marcas padrão e opção de "Outro" -->
+                      <option value="">Selecione...</option> <!-- opção vazia inicial -->
+                      <option value="CommScope">CommScope</option> <!-- opção para marca CommScope -->
+                      <option value="Furukawa">Furukawa</option> <!-- opção para marca Furukawa -->
+                      <option value="outro">Outro (especificar)</option> <!-- opção genérica para qualquer outra marca -->
+                    </select>
+                  </div>
+
+                  <div
+                    class="form-group invisible-keep-space"                         
+                    id="q1-marca-cab-outro-wrapper"                   
+                  >
+                    <label for="q1-marca-cab-outro">Informe a marca do cabeamento</label> <!-- rótulo do campo de marca "Outro" -->
+                    <input
+                      type="text"                                    
+                      id="q1-marca-cab-outro"                        
+                      placeholder="Digite a marca do cabeamento"     
+                    />
+                  </div>
+                </div>
+                <!-- linha com quantidade de guias de cabos e nome do patch panel existente -->
+                <div class="form-row">
+                  <div class="form-group"><!-- identificação do patch panel existente -->
+                    <label for="q1-patch-panel-existente-nome">Nome/identificação do patch panel existente</label>
+                    <input
+                      type="text"
+                      id="q1-patch-panel-existente-nome"
+                      placeholder="Preencha se for utilizar patch panel existente"
+                    />
+                  </div>
+                </div>
+
+                <!-- linha com detalhes dos patch cords (modelo e cor) -->
+                <div class="form-row">
+                  <div class="form-group"><!-- modelo dos patch cords -->
+                    <label for="q1-patch-cords-modelo">Modelo dos patch cords</label> <!-- rótulo do campo de modelo -->
+                    <select id="q1-patch-cords-modelo"><!-- select com os comprimentos padrão de patch cords -->
+                      <option value="">Selecione...</option> <!-- opção inicial vazia -->
+                      <option value="0,5 mt">0,5 mt</option> <!-- patch cord de 0,5 metro -->
+                      <option value="1,5 mt">1,5 mt</option> <!-- patch cord de 1,5 metro -->
+                      <option value="3,0 mt">3,0 mt</option> <!-- patch cord de 3,0 metros -->
+                      <option value="5mt">5mt</option> <!-- patch cord de 5 metros -->
+                      <option value="10mt">10mt</option> <!-- patch cord de 10 metros -->
+                      <option value="15mt">15mt</option> <!-- patch cord de 15 metros -->
+                    </select>
+                  </div>
+
+                  <div class="form-group"><!-- cor dos patch cords -->
+                    <label for="q1-patch-cords-cor">Cor dos patch cords</label> <!-- rótulo do campo de cor -->
+                    <select id="q1-patch-cords-cor"><!-- select com as cores padrão dos patch cords -->
+                      <option value="">Selecione...</option> <!-- opção inicial vazia -->
+                      <option value="branco">Branco</option> <!-- patch cords na cor branca -->
+                      <option value="amarelo">Amarelo</option> <!-- patch cords na cor amarela -->
+                      <option value="cinza">Cinza</option> <!-- patch cords na cor cinza -->
+                      <option value="vermelho">Vermelho</option> <!-- patch cords na cor vermelha -->
+                      <option value="azul">Azul</option> <!-- patch cords na cor azul -->
+                    </select>
+                  </div>
+                </div>
+                <!-- Seção: Quantitativo 02 - Switch -->
+                <h3 class="form-section-title">Switch</h3>
+
+                <div class="form-row"><!-- linha com flags de switch -->
+                  <div class="form-group"><!-- flag: novo switch -->
+                    <label for="q2-novo-switch">Necessita novo switch?</label>
+                    <select id="q2-novo-switch">
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+                   
+                  <div class="form-group invisible-keep-space" id="q2-fornecedor-switch-wrapper">
+                    <label for="q2-fornecedor-switch">Fornecedor do switch</label>
+                    <select id="q2-fornecedor-switch">
+                      <option value="">Selecione...</option>
+                      <option value="quotation_evaluation">Technical Quotation Evaluation</option>
+                      <option value="cliente">Cliente</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- linha com fornecedor e modelo do switch -->
+                <div class="form-row">
+                  <div class="form-group"><!-- modelo do switch -->
+                    <label for="q2-modelo-switch">Modelo do switch</label>
+                    <input
+                      type="text"
+                      id="q2-modelo-switch"
+                      placeholder="Ex.: Switch 24p Gigabit, modelo XYZ..."
+                    />
+                  </div>
+                </div>
+
+                <!-- linha com identificação e fotos do switch existente -->
+                <div class="form-row">
+
+                  <!-- Campo LEGADO oculto: mantém a URL principal da foto do switch para compatibilidade com o backend -->
+                  <input
+                    type="hidden"
+                    id="q2-switch-foto-url"
+                  />
+
+                  <div class="form-group">
+                    <label>Fotos do switch</label>                 <!-- título da seção de fotos do switch -->
+
+                    <!-- [NOVO] Container em lista (mobile-friendly, igual Localização/Imagens) -->
+                    <div id="q2-switch-imagens-rows" class="image-rows">
+                      <!-- [NOVO] As linhas (miniatura + descrição + botões) serão criadas via JS na Etapa 2 -->
+                    </div>
+
+                    <!-- [NOVO] Input file compartilhado da seção (abre via botão "Selecionar imagem") -->
+                    <input
+                      type="file"
+                      id="q2-switch-imagens-file-input"
+                      accept="image/*"                 
+                      class="hidden"                   
+                    />
+
+                    <!-- [LEGADO] Wrapper de tabela reutilizando o estilo padrão de tabelas do sistema -->
+                    <div class="table-wrapper legacy-q2-switch-table">
+                      <table
+                        class="table"
+                        id="q2-switch-fotos-tabela"
+                      >
+                        <thead>
+                          <tr>
+                            <th>Foto</th>                          <!-- coluna onde ficará a imagem -->
+                            <th>Descrição / legenda</th>           <!-- coluna de texto livre para legenda/descrição -->
+                            <th class="q2-switch-fotos-acoes-header"></th> <!-- coluna de ações (remover) -->
+                          </tr>
+                        </thead>
+                        <tbody id="q2-switch-fotos-tbody">         <!-- corpo da tabela onde as linhas de fotos serão gerenciadas via JS -->
+                          <!-- Linha inicial que serve como modelo para novas fotos -->
+                          <tr class="q2-switch-fotos-linha">       <!-- linha modelo para ser clonada pelo JavaScript -->
+                            <td>
+                              <div class="q2-switch-foto-bloco">   <!-- bloco vertical com preview e controles internos -->
+                          <div class="q2-switch-foto-preview-container">        <!-- container do preview (clique também seleciona arquivo) -->
+                                  <img
+                                    src=""
+                                    alt="Pré-visualização da foto do switch"
+                                    class="q2-switch-foto-preview"          
+                                  />
+                                  <span class="q2-switch-foto-placeholder"> <!-- placeholder quando não há foto -->
+                                    Clique para selecionar a foto
+                                  </span>                                  <!-- texto de placeholder quando não há foto -->
+                                </div>
+
+                                <div class="q2-switch-foto-botoes">        <!-- linha de botões por foto -->
+                                  <button
+                                    type="button"                         
+                                    class="btn btn-secondary btn-small q2-switch-foto-selecionar-btn"
+                                  >
+                                    Selecionar imagem
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    class="btn btn-primary btn-small q2-switch-foto-abrir-camera-btn"
+                                  >
+                                    Abrir câmera
+                                  </button>
+                                </div>
+
+                                <!-- Campo escondido que guarda a URL da foto associada a esta linha -->
+                                <input
+                                  type="hidden"
+                                  class="q2-switch-foto-url-input"
+                                />
+                              </div>
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                class="q2-switch-foto-descricao-input"
+                                placeholder="Descrição ou observação da foto"
+                              />
+                            </td>
+                            <td class="q2-switch-fotos-acoes">
+                              <button
+                                type="button"
+                                class="btn btn-excluir btn-small q2-switch-foto-remover"
+                                title="Remover foto"
+                              >
+                                🗑️
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <!-- Rodapé da seção com botão para adicionar novas fotos -->
+                    <div class="q2-switch-fotos-acoes-footer legacy-q2-switch-table"> <!-- [LEGADO] escondido; mantido por compatibilidade -->
+                      <button
+                        type="button"
+                        id="btn-q2-switch-adicionar-foto"
+                        class="btn btn-secondary btn-small"
+                      >
+                        Adicionar foto
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="form-group">
+                  <div class="image-section-footer">
+                        <button
+                          type="button"                  
+                          id="btn-q2-switch-adicionar-imagem"
+                          class="btn btn-primary btn-small image-add-row-btn"
+                          title="Adicionar nova foto do switch"
+                        >
+                          Nova imagem
+                        </button>
+                  </div>
+                </div>
+                <div class="form-row"><!-- linha de observações de switch -->
+                  <div class="form-group full-width"><!-- campo texto de observações sobre o switch -->
+                    <label for="q2-observacoes">Observações sobre switches</label>
+                    <textarea
+                      id="q2-observacoes"
+                      rows="2"
+                      placeholder="Observações específicas sobre switches (modelo, local, etc.)."
+                    ></textarea>
+                  </div>
+                </div>
+
+              </div>
+              <!-- Fim seções comuns -->
+
+              <!-- ==================== SEÇÃO ESPECÍFICA REDES (UTP/FIBRA) ==================== -->
+              <div class="tipo-redes-only">
+
+                <!-- Seção: Quantitativo 03 - Fibra Óptica -->
+                <h3 class="form-section-title">Cabeamento Óptico</h3> <!-- título da seção de fibra -->
+
+                <div class="form-row"><!-- linha com tipo de fibra, fibras por cabo e tipo de conector -->
+
+                  <div class="form-group"><!-- marca do cabo óptico (Furukawa / CommScope / Outro) -->
+                    <label for="q3-marca-cab-optico">Marca do cabo óptico</label> <!-- rótulo da marca de cabo óptico -->
+                    <select id="q3-marca-cab-optico"><!-- select com marcas padrão e opção "Outro" -->
+                      <option value="">Selecione...</option> <!-- opção vazia inicial -->
+                      <option value="Furukawa">Furukawa</option> <!-- marca Furukawa -->
+                      <option value="CommScope">CommScope</option> <!-- marca CommScope -->
+                      <option value="outro">Outro (especificar)</option> <!-- opção para qualquer outra marca -->
+                    </select>
+                  </div>
+
+                  <div class="form-group invisible-keep-space" id="q3-marca-cab-optico-outro-wrapper"><!-- wrapper do campo "Outro" para marca -->
+                    <label for="q3-marca-cab-optico-outro">Informe a marca</label> <!-- rótulo do campo "Outro" -->
+                    <input
+                      type="text"
+                      id="q3-marca-cab-optico-outro"
+                      placeholder="Digite a marca do cabo óptico"
+                    />
+                  </div>
+
+                </div>
+
+                <div  class="form-row">
+                  <div class="form-group"><!-- tipo de fibra -->
+                    <label for="q3-tipo-fibra">Tipo de fibra</label> <!-- rótulo -->
+                    <select id="q3-tipo-fibra">
+                      <option value="">Selecione...</option>
+                      <option value="SM">SM</option>
+                      <option value="OM1">OM1</option>
+                      <option value="OM3">OM3</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group"><!-- quantidade de fibras por cabo -->
+                    <label for="q3-qtd-fibras-por-cabo">Qtd. de fibras por cabo</label> <!-- rótulo -->
+                    <select id="q3-qtd-fibras-por-cabo">
+                      <option value="">Selecione...</option>
+                      <option value="2">2F</option>
+                      <option value="4">4F</option>
+                      <option value="6">6F</option>
+                      <option value="12">12F</option>
+                      <option value="24">24F</option>
+                      <option value="48">48F</option>
+                    </select>
+                  </div>
+
+                </div>
+
+                <!-- linha: necessidade de novo DIO e modelo -->
+                <div class="form-row">
+
+                   <div class="form-group"><!-- tipo de conector -->
+                      <label for="q3-tipo-conector">Tipo de conector</label> <!-- rótulo -->
+                      <select id="q3-tipo-conector">
+                        <option value="">Selecione...</option>
+                        <option value="LC">LC</option>
+                        <option value="SC">SC</option>
+                        <option value="ST">ST</option>
+                        <option value="MTRJ">MTRJ</option>
+                      </select>
+                   </div>
+
+                   <div class="form-group"><!-- flag: caixa de terminação -->
+                      <label for="q3-caixa-terminacao">Caixa de terminação?</label> <!-- rótulo -->
+                      <select id="q3-caixa-terminacao">
+                        <option value="">Selecione...</option>
+                        <option value="sim">Sim</option>
+                        <option value="nao">Não</option>
+                      </select>
+                   </div>
+
+                   <div class="form-group"><!-- flag: caixa de emenda -->
+                      <label for="q3-caixa-emenda">Caixa de emenda?</label> <!-- rótulo -->
+                      <select id="q3-caixa-emenda"><!-- select Sim/Não para caixa de emenda -->
+                        <option value="">Selecione...</option> <!-- padrão -->
+                        <option value="sim">Sim</option> <!-- true -->
+                        <option value="nao">Não</option> <!-- false -->
+                      </select>
+                  </div>
+
+                </div>
+                <div class="form-row">
+                  <div class="form-group"><!-- flag: necessário novo DIO? -->
+                    <label for="q3-novo-dio">Necessário novo DIO?</label> <!-- rótulo da pergunta -->
+                    <select id="q3-novo-dio"><!-- select Sim/Não controlando o uso de DIO novo -->
+                      <option value="">Selecione...</option> <!-- opção vazia inicial -->
+                      <option value="sim">Sim</option> <!-- haverá fornecimento de DIO novo -->
+                      <option value="nao">Não</option> <!-- será reaproveitado DIO existente ou não aplicável -->
+                    </select>
+                  </div>
+
+                  <div class="form-group invisible-keep-space" id="q3-modelo-dio-wrapper">
+                    <label for="q3-modelo-dio">Modelo do DIO</label> <!-- rótulo do campo de modelo -->
+                    <input
+                      type="text"
+                      id="q3-modelo-dio"
+                      placeholder="Informe o modelo do DIO a ser fornecido"
+                    />
+                  </div>
+                </div>
+
+
+                <div class="form-row"><!-- linha com caixa de emenda e quantitativos -->
+                  
+                  <!-- <div class="form-group"> -->
+                    <!-- <label for="q3-tipo-cabo-optico">Tipo de cabo óptico</label> -->
+                    <!-- <select id="q3-tipo-cabo-optico"> -->
+                      <!-- <option value="">Selecione...</option> -->
+                      <!-- <option value="indoor">Indoor</option> -->
+                      <!-- <option value="outdoor">Outdoor</option> -->
+                      <!-- <option value="autossustentado">Autossustentado</option> -->
+                    <!-- </select> -->
+                  <!-- </div> -->
+                  
+                  <div class="form-group"><!-- quantidade de cabos -->
+                    <label for="q3-qtd-cabos">Qtd. de cabos ópticos</label>
+                    <input
+                      type="number"
+                      id="q3-qtd-cabos"
+                      min="0"
+                      step="1"
+                      placeholder="Ex.: 2"
+                    />
+                  </div>
+
+                  <div class="form-group"><!-- tamanho total em metros -->
+                    <label for="q3-tamanho-total-m">Tamanho total (m)</label>
+                    <input
+                      type="number"
+                      id="q3-tamanho-total-m"
+                      min="0"
+                      step="0.1"
+                      placeholder="Ex.: 150"
+                    />
+                  </div>
+                </div>
+                <!-- linha com modelo do cordão óptico -->
+                <div class="form-row">
+                  <div class="form-group"><!-- modelo/descrição do cordão óptico -->
+                    <label for="q3-modelo-cordao-optico">Modelo do cordão óptico</label>
+                    <input
+                      type="text"
+                      id="q3-modelo-cordao-optico"
+                      placeholder="Ex.: LC-LC 2m, LC-SC 3m, etc."
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="q3-qtd-cordoes-opticos">Qtd. de cordões ópticos</label>
+                    <input
+                      type="number"
+                      id="q3-qtd-cordoes-opticos"
+                      min="0"
+                      step="1"
+                      placeholder="Ex.: 24"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-row"><!-- linha de observações de fibra -->
+                  <div class="form-group full-width"><!-- campo texto de observações de fibra -->
+                    <label for="q3-observacoes">Observações sobre fibra óptica</label>
+                    <textarea
+                      id="q3-observacoes"
+                      rows="2"
+                      placeholder="Observações específicas sobre a rede óptica (rota, caixas, particularidades, etc.)."
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Seção: Quantitativo 04 - Equipamentos -->
+              <div class="tipo-camera-only">
+                <h3 class="form-section-title">Equipamentos</h3> <!-- título da seção de equipamentos -->
+
+                <div class="form-row"><!-- linha com flags de equipamentos -->
+                  <div class="form-group" width="50%"><!-- flag: câmera -->
+                    <label for="q4-camera">Nova câmera?</label> <!-- rótulo -->
+                    <select id="q4-camera"><!-- select Sim/Não para câmera -->
+                      <option value="">Selecione...</option> <!-- padrão -->
+                      <option value="sim">Sim</option> <!-- true no backend -->
+                      <option value="nao">Não</option> <!-- false no backend -->
+                    </select>
+                  </div>
+                
+                  <div 
+                    class="form-group invisible-keep-space" 
+                    id="q4-camera-nova-wrapper">
+                    <label for="q4-camera-nova">Realocação de câmera?</label>
+                    <select id="q4-camera-nova"><!-- select Sim/Não para câmera nova -->
+                      <option value="">Selecione...</option><!-- padrão -->
+                      <option value="sim">Sim</option><!-- true -->
+                      <option value="nao">Não</option><!-- false -->
+                    </select>
+                  </div>
+
+                  <div 
+                    class="form-group invisible-keep-space" 
+                    id="q4-camera-modelo-wrapper">
+                    <label for="q4-camera-modelo">Modelo da câmera</label>
+                    <input
+                      type="text"
+                      id="q4-camera-modelo"
+                      placeholder="Ex.: Bullet 8MP IR, Dome 4MP, etc."
+                    />
+                  </div>
+
+                  <div 
+                    class="form-group invisible-keep-space" 
+                    id="q4-camera-qtd-wrapper"><!-- quantidade de câmeras do modelo informado -->
+                    <label for="q4-camera-qtd">Qtd. de câmeras</label>
+                    <input
+                      type="number"
+                      id="q4-camera-qtd"
+                      min="0"
+                      step="1"
+                      placeholder="Ex.: 8"
+                    />
+                  </div>
+                </div>
+
+                <!-- linha com modelo do NVR/DVR -->
+                <div class="form-row">
+                  
+                  <div class="form-group">
+                    <label for="q4-camera-fornecedor">Fornecedor da câmera</label>
+                    <select id="q4-camera-fornecedor">
+                      <option value="">Selecione...</option>
+                      <option value="quotation_evaluation">Technical Quotation Evaluation</option>
+                      <option value="cliente">Cliente</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group"><!-- flag: NVR/DVR -->
+                    <label for="q4-nvr-dvr">NVR / DVR?</label> <!-- rótulo -->
+                    <select id="q4-nvr-dvr"><!-- select Sim/Não para NVR/DVR -->
+                      <option value="">Selecione...</option> <!-- padrão -->
+                      <option value="sim">Sim</option> <!-- true -->
+                      <option value="nao">Não</option> <!-- false -->
+                    </select>
+                  </div>
+
+                  <div class="form-group invisible-keep-space" id="q4-nvr-dvr-modelo-wrapper"><!-- modelo do NVR ou DVR -->
+                    <label for="q4-nvr-dvr-modelo">Modelo do NVR / DVR</label>
+                    <input
+                      type="text"
+                      id="q4-nvr-dvr-modelo"
+                      placeholder="Ex.: NVR 32 canais 4K, DVR 16 canais, etc."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- ==================== CONTROLE DE ACESSO SECTIONS ==================== -->
+              <div class="tipo-ca-only">
+
+                <!-- ==================== QUANTITATIVO 09: ANÁLISE DE PAINEL DE AUTOMAÇÃO ==================== -->
+                <h3 class="form-section-title">Análise de Painel de Automação</h3>
+
+                <div class="form-row">
+                  <!-- Tensão da Fonte -->
+                  <div class="form-group">
+                    <label for="q9-tensao-fonte">Tensão da Fonte</label>
+                    <select id="q9-tensao-fonte">
+                      <option value="">Selecione...</option>
+                      <option value="12V">12V</option>
+                      <option value="24V">24V</option>
+                      <option value="outro">Outro</option>
+                    </select>
+                  </div>
+
+                  <!-- Campo condicional: Tensão customizada -->
+                  <div class="form-group invisible-keep-space" id="q9-tensao-fonte-outro-wrapper">
+                    <label for="q9-tensao-fonte-outro">Especificar tensão</label>
+                    <input type="text" id="q9-tensao-fonte-outro" placeholder="Ex.: 48V, 110V..."/>
+                  </div>
+                </div>
+
+                <!-- Tabela de Materiais do Painel -->
+                <div class="form-row">
+                  <div class="form-group full-width">
+                    <label>Lista de materiais do painel (Bornes, módulos, etc.)</label>
+
+                    <div class="table-wrapper">
+                      <table class="table" id="q9-materiais-painel-tabela">
+                        <thead>
+                          <tr>
+                            <th>Componente</th>
+                            <th>Modelo</th>
+                            <th>Quantidade</th>
+                            <th>Fabricante</th>
+                            <th class="q9-materiais-painel-acoes-header"></th>
+                          </tr>
+                        </thead>
+                        <tbody id="q9-materiais-painel-tbody">
+                          <tr class="q9-materiais-painel-linha">
+                            <td>
+                              <input type="text" class="q9-materiais-painel-componente" placeholder="Ex.: Borne, Módulo, Relé..."/>
+                            </td>
+                            <td>
+                              <input type="text" class="q9-materiais-painel-modelo" placeholder="Ex.: Marca / modelo / especificação"/>
+                            </td>
+                            <td>
+                              <input type="number" class="q9-materiais-painel-quantidade" min="0" step="1" placeholder="Ex.: 1"/>
+                            </td>
+                            <td>
+                              <input type="text" class="q9-materiais-painel-fabricante" placeholder="Ex.: Fabricante principal"/>
+                            </td>
+                            <td class="q9-materiais-painel-acoes">
+                              <button type="button" class="btn btn-excluir btn-small q9-remover-linha" title="Remover linha">🗑️</button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div class="lista-materiais-acoes">
+                      <button type="button" id="btn-q9-adicionar-linha" class="btn btn-primary btn-small">Nova linha</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Novo Cabeamento -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="q9-novo-cabeamento">Novo cabeamento?</label>
+                    <select id="q9-novo-cabeamento">
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+
+                  <!-- Campo condicional: Tipo do cabeamento -->
+                  <div class="form-group invisible-keep-space" id="q9-tipo-cabeamento-wrapper">
+                    <label for="q9-tipo-cabeamento">Tipo do cabeamento</label>
+                    <select id="q9-tipo-cabeamento">
+                      <option value="">Selecione...</option>
+                      <option value="7 vias">7 vias</option>
+                      <option value="14 vias">14 vias</option>
+                      <option value="outro">Outro</option>
+                    </select>
+                  </div>
+
+                  <!-- Campo condicional: Tipo customizado -->
+                  <div class="form-group invisible-keep-space" id="q9-tipo-cabeamento-outro-wrapper">
+                    <label for="q9-tipo-cabeamento-outro">Especificar tipo</label>
+                    <input type="text" id="q9-tipo-cabeamento-outro" placeholder="Ex.: 2 vias, etc."/>
+                  </div>
+
+                  <!-- Campo condicional: Quantidade (metros) -->
+                  <div class="form-group invisible-keep-space" id="q9-quantidade-metros-wrapper">
+                    <label for="q9-quantidade-metros">Quantidade (metros)</label>
+                    <input type="number" id="q9-quantidade-metros" min="0" step="0.1" placeholder="Ex.: 50"/>
+                  </div>
+                </div>
+
+                <!-- Observações Q9 -->
+                <div class="form-row">
+                  <div class="form-group full-width">
+                    <label for="q9-observacoes">Observações</label>
+                    <textarea id="q9-observacoes" placeholder="Observações adicionais sobre o painel de automação..." style="height: 100px;"></textarea>
+                  </div>
+                </div>
+
+                <!-- ==================== QUANTITATIVO 10: PORTAS ==================== -->
+                <h3 class="form-section-title">Portas</h3>
+                <h4 style="margin: -10px 0 15px 0; font-size: 0.9rem; font-weight: normal; color: #666;">Destinado para instalação envolvendo portas</h4>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="q10-tipo-porta">Tipo de porta</label>
+                    <select id="q10-tipo-porta">
+                      <option value="">Selecione...</option>
+                      <option value="automatica">Automática</option>
+                      <option value="pivotante">Pivotante</option>
+                      <option value="deslizante">Deslizante</option>
+                      <option value="anti_panico">Anti Pânico</option>
+                    </select>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-servo-motor-wrapper">
+                    <label for="q10-servo-motor">Servo motor?</label>
+                    <select id="q10-servo-motor">
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-servo-motor-qtd-wrapper">
+                    <label for="q10-servo-motor-qtd">Quantidade</label>
+                    <input type="number" id="q10-servo-motor-qtd" min="0" step="1" placeholder="Ex.: 1"/>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="q10-ponto-eletrico-novo">Precisa de ponto elétrico novo?</label>
+                    <select id="q10-ponto-eletrico-novo">
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                    <small style="display: block; margin-top: 4px; color: #e67e22;">Se sim, informar o solicitante</small>
+                  </div>
+                </div>
+
+                <!-- Eletroímã/Fechadura (novo) -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="q10-eletroimã-fechadura">Precisa de eletroímã/fechadura?</label>
+                    <select id="q10-eletroimã-fechadura">
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-eletroimã-fechadura-modelo-wrapper">
+                    <label for="q10-eletroimã-fechadura-modelo">Modelo</label>
+                    <input type="text" id="q10-eletroimã-fechadura-modelo" placeholder="Ex.: Intelbras, HDL..."/>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-eletroimã-fechadura-qtd-wrapper">
+                    <label for="q10-eletroimã-fechadura-qtd">Quantidade</label>
+                    <input type="number" id="q10-eletroimã-fechadura-qtd" min="0" step="1" placeholder="Ex.: 1"/>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="q10-suporte-eletroimã">Suporte para eletroímã/fechadura eletrônica?</label>
+                    <select id="q10-suporte-eletroimã">
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-suporte-eletroimã-qtd-wrapper">
+                    <label for="q10-suporte-eletroimã-qtd">Quantidade</label>
+                    <input type="number" id="q10-suporte-eletroimã-qtd" min="0" step="1" placeholder="Ex.: 2"/>
+                  </div>
+                </div>
+
+                <!-- Mola Hidráulica (novo) -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="q10-mola-hidraulica">Mola hidráulica?</label>
+                    <select id="q10-mola-hidraulica">
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-mola-hidraulica-tipo-wrapper">
+                    <label for="q10-mola-hidraulica-tipo">Tipo de mola</label>
+                    <select id="q10-mola-hidraulica-tipo">
+                      <option value="">Selecione...</option>
+                      <option value="piso">Mola de piso</option>
+                      <option value="aerea">Mola aérea</option>
+                    </select>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-mola-hidraulica-qtd-wrapper">
+                    <label for="q10-mola-hidraulica-qtd">Quantidade</label>
+                    <input type="number" id="q10-mola-hidraulica-qtd" min="0" step="1" placeholder="Ex.: 2"/>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="q10-botoeira-saida">Botoeira de saída?</label>
+                    <select id="q10-botoeira-saida">
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-botoeira-saida-modelo-wrapper">
+                    <label for="q10-botoeira-saida-modelo">Modelo</label>
+                    <input type="text" id="q10-botoeira-saida-modelo" placeholder="Ex.: Intelbras, HDL..."/>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-botoeira-saida-qtd-wrapper">
+                    <label for="q10-botoeira-saida-qtd">Quantidade</label>
+                    <input type="number" id="q10-botoeira-saida-qtd" min="0" step="1" placeholder="Ex.: 1"/>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="q10-botoeira-emergencia">Botoeira de emergência?</label>
+                    <select id="q10-botoeira-emergencia">
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-botoeira-emergencia-modelo-wrapper">
+                    <label for="q10-botoeira-emergencia-modelo">Modelo</label>
+                    <input type="text" id="q10-botoeira-emergencia-modelo" placeholder="Ex.: Intelbras, HDL..."/>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-botoeira-emergencia-qtd-wrapper">
+                    <label for="q10-botoeira-emergencia-qtd">Quantidade</label>
+                    <input type="number" id="q10-botoeira-emergencia-qtd" min="0" step="1" placeholder="Ex.: 1"/>
+                  </div>
+                </div>
+
+                <!-- Proteção para Botoeira de Emergência (novo) -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="q10-protecao-botoeira-emergencia-qtd">Proteção para botoeira de emergência (quantidade)</label>
+                    <input type="number" id="q10-protecao-botoeira-emergencia-qtd" min="0" step="1" placeholder="Ex.: 2"/>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="q10-leitor-cartao">Leitor de cartão?</label>
+                    <select id="q10-leitor-cartao">
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-leitor-cartao-modelo-wrapper">
+                    <label for="q10-leitor-cartao-modelo">Modelo</label>
+                    <input type="text" id="q10-leitor-cartao-modelo" placeholder="Ex.: Intelbras, HDL..."/>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-leitor-cartao-qtd-wrapper">
+                    <label for="q10-leitor-cartao-qtd">Quantidade</label>
+                    <input type="number" id="q10-leitor-cartao-qtd" min="0" step="1" placeholder="Ex.: 2"/>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="q10-leitor-facial">Leitor facial?</label>
+                    <select id="q10-leitor-facial">
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-leitor-facial-modelo-wrapper">
+                    <label for="q10-leitor-facial-modelo">Modelo</label>
+                    <input type="text" id="q10-leitor-facial-modelo" placeholder="Ex.: Intelbras, HDL..."/>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-leitor-facial-qtd-wrapper">
+                    <label for="q10-leitor-facial-qtd">Quantidade</label>
+                    <input type="number" id="q10-leitor-facial-qtd" min="0" step="1" placeholder="Ex.: 1"/>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="q10-sensor-presenca">Sensor de presença?</label>
+                    <select id="q10-sensor-presenca">
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-sensor-presenca-modelo-wrapper">
+                    <label for="q10-sensor-presenca-modelo">Modelo</label>
+                    <input type="text" id="q10-sensor-presenca-modelo" placeholder="Ex.: Intelbras, HDL..."/>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-sensor-presenca-qtd-wrapper">
+                    <label for="q10-sensor-presenca-qtd">Quantidade</label>
+                    <input type="number" id="q10-sensor-presenca-qtd" min="0" step="1" placeholder="Ex.: 2"/>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="q10-sensor-barreira">Sensor de barreira/segurança?</label>
+                    <select id="q10-sensor-barreira">
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-sensor-barreira-modelo-wrapper">
+                    <label for="q10-sensor-barreira-modelo">Modelo</label>
+                    <input type="text" id="q10-sensor-barreira-modelo" placeholder="Ex.: Intelbras, HDL..."/>
+                  </div>
+                  <div class="form-group invisible-keep-space" id="q10-sensor-barreira-qtd-wrapper">
+                    <label for="q10-sensor-barreira-qtd">Quantidade</label>
+                    <input type="number" id="q10-sensor-barreira-qtd" min="0" step="1" placeholder="Ex.: 2"/>
+                  </div>
+                </div>
+
+                <!-- Observações Q10 -->
+                <div class="form-row">
+                  <div class="form-group full-width">
+                    <label for="q10-observacoes">Observações</label>
+                    <textarea id="q10-observacoes" placeholder="Observações adicionais sobre as portas..." style="height: 100px;"></textarea>
+                  </div>
+                </div>
+
+              </div>
+              <!-- ==================== FIM CONTROLE DE ACESSO ==================== -->
+
+              <!-- ==================== QUANTITATIVO 06: CATRACAS, TORNIQUETES E CANCELAS ==================== -->
+              <div class="tipo-ca-only">
+              <h3 class="form-section-title">Catracas, torniquetes e cancelas</h3>
+              <h4 style="margin: -10px 0 15px 0; font-size: 0.9rem; font-weight: normal; color: #666;">Destinado para instalação de catracas, torniquetes e cancelas</h4>
+
+              <!-- Modelo do equipamento -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="q6-modelo">Modelo do equipamento</label>
+                  <input type="text" id="q6-modelo" placeholder="Ex.: Catraca eletrônica, Torniquete, Cancela automática..."/>
+                </div>
+
+                <!-- Quantidade -->
+                <div class="form-group">
+                  <label for="q6-quantidade">Quantidade</label>
+                  <input type="number" id="q6-quantidade" min="0" step="1" placeholder="Ex.: 2"/>
+                </div>
+              </div>
+
+              <!-- Leitor facial -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="q6-leitor-facial">Leitor facial?</label>
+                  <select id="q6-leitor-facial">
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+                <div class="form-group invisible-keep-space" id="q6-leitor-facial-qtd-wrapper">
+                  <label for="q6-leitor-facial-qtd">Quantidade</label>
+                  <input type="number" id="q6-leitor-facial-qtd" min="0" step="1" placeholder="Ex.: 1"/>
+                </div>
+              </div>
+
+              <!-- Suporte para leitor facial -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="q6-suporte-leitor-facial">Suporte para leitor facial?</label>
+                  <select id="q6-suporte-leitor-facial">
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+                <div class="form-group invisible-keep-space" id="q6-suporte-leitor-facial-qtd-wrapper">
+                  <label for="q6-suporte-leitor-facial-qtd">Quantidade</label>
+                  <input type="number" id="q6-suporte-leitor-facial-qtd" min="0" step="1" placeholder="Ex.: 1"/>
+                </div>
+              </div>
+
+              <!-- Leitor de cartão -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="q6-leitor-cartao">Leitor de cartão?</label>
+                  <select id="q6-leitor-cartao">
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+                <div class="form-group invisible-keep-space" id="q6-leitor-cartao-qtd-wrapper">
+                  <label for="q6-leitor-cartao-qtd">Quantidade</label>
+                  <input type="number" id="q6-leitor-cartao-qtd" min="0" step="1" placeholder="Ex.: 2"/>
+                </div>
+              </div>
+
+              <!-- REMOVIDO: Suporte para leitor de cartão (não existe, é imbutido)
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="q6-suporte-leitor-cartao">Suporte para leitor de cartão?</label>
+                  <select id="q6-suporte-leitor-cartao">
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+                <div class="form-group invisible-keep-space" id="q6-suporte-leitor-cartao-qtd-wrapper">
+                  <label for="q6-suporte-leitor-cartao-qtd">Quantidade</label>
+                  <input type="number" id="q6-suporte-leitor-cartao-qtd" min="0" step="1" placeholder="Ex.: 1"/>
+                </div>
+              </div>
+              -->
+
+              <!-- Licença do software -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="q6-licenca-software">Licença do software?</label>
+                  <select id="q6-licenca-software">
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- No break -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="q6-no-break">No break?</label>
+                  <select id="q6-no-break">
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="q6-no-break-modelo">Modelo</label>
+                  <input type="text" id="q6-no-break-modelo" placeholder="Ex.: APC, SMS..."/>
+                </div>
+                <div class="form-group">
+                  <label for="q6-no-break-qtd">Quantidade</label>
+                  <input type="number" id="q6-no-break-qtd" min="0" step="1" placeholder="Ex.: 1"/>
+                </div>
+              </div>
+
+              <!-- Servidor -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="q6-servidor">Servidor?</label>
+                  <select id="q6-servidor">
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="q6-servidor-modelo">Modelo</label>
+                  <input type="text" id="q6-servidor-modelo" placeholder="Ex.: Dell, HP..."/>
+                </div>
+                <div class="form-group">
+                  <label for="q6-servidor-qtd">Quantidade</label>
+                  <input type="number" id="q6-servidor-qtd" min="0" step="1" placeholder="Ex.: 1"/>
+                </div>
+              </div>
+
+              <!-- Observações Q6 -->
+              <div class="form-row">
+                <div class="form-group full-width">
+                  <label for="q6-observacoes">Observações</label>
+                  <textarea id="q6-observacoes" placeholder="Observações adicionais sobre catracas, torniquetes e cancelas..." style="height: 100px;"></textarea>
+                </div>
+              </div>
+              </div>
+              <!-- ==================== FIM CATRACAS ==================== -->
+
+              <!-- Seção: Quantitativo 05 - Infraestrutura -->
+                <h3 class="form-section-title">Infraestrutura</h3> <!-- título seção infraestrutura -->
+
+                <div class="form-row"><!-- linha com flags de infraestrutura -->
+                  <div class="form-group"><!-- flag: nova eletrocalha -->
+                    <label for="q5-nova-eletrocalha">Nova eletrocalha?</label> <!-- rótulo -->
+                    <select id="q5-nova-eletrocalha"><!-- select Sim/Não eletrocalha -->
+                      <option value="">Selecione...</option> <!-- padrão -->
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group"><!-- flag: novo eletroduto -->
+                    <label for="q5-novo-eletroduto">Novo eletroduto?</label> <!-- rótulo -->
+                    <select id="q5-novo-eletroduto"><!-- select Sim/Não eletroduto -->
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group"><!-- flag: novo rack -->
+                    <label for="q5-novo-rack">Novo rack?</label> <!-- rótulo -->
+                    <select id="q5-novo-rack"><!-- select Sim/Não rack -->
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row"><!-- linha com mais flags de infraestrutura -->
+                  <div class="form-group"><!-- flag: instalação elétrica -->
+                    <label for="q5-instalacao-eletrica">Instalação elétrica?</label> <!-- rótulo -->
+                    <select id="q5-instalacao-eletrica"><!-- select Sim/Não elétrica -->
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group"><!-- flag: nobreak -->
+                    <label for="q5-nobreak">Nobreak?</label> <!-- rótulo -->
+                    <select id="q5-nobreak"><!-- select Sim/Não nobreak -->
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group"><!-- flag: serralheria -->
+                    <label for="q5-serralheria">Serralheria?</label> <!-- rótulo -->
+                    <select id="q5-serralheria"><!-- select Sim/Não serralheria -->
+                      <option value="">Selecione...</option>
+                      <option value="sim">Sim</option>
+                      <option value="nao">Não</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- linha com modelo/quantidade de eletrocalha -->
+                <div class="form-row">
+                  <div class="form-group"><!-- modelo da eletrocalha -->
+                    <label for="q5-eletrocalha-modelo">Modelo da eletrocalha</label>
+                    <input
+                      type="text"
+                      id="q5-eletrocalha-modelo"
+                      placeholder="Ex.: Eletrocalha 100x50 galvanizada, leito, etc."
+                    />
+                  </div>
+
+                  <div class="form-group"><!-- quantidade de eletrocalhas -->
+                    <label for="q5-eletrocalha-qtd">Qtd. de eletrocalhas</label>
+                    <input
+                      type="number"
+                      id="q5-eletrocalha-qtd"
+                      min="0"
+                      step="1"
+                      placeholder="Ex.: 10"
+                    />
+                  </div>
+                </div>
+
+                <!-- linha com modelo/quantidade de eletroduto -->
+                <div class="form-row">
+                  <div class="form-group"><!-- modelo do eletroduto -->
+                    <label for="q5-eletroduto-modelo">Modelo do eletroduto</label>
+                    <input
+                      type="text"
+                      id="q5-eletroduto-modelo"
+                      placeholder="Ex.: Eletroduto 3/4\" PVC rígido, etc."
+                    />
+                  </div>
+
+                  <div class="form-group"><!-- quantidade de eletrodutos -->
+                    <label for="q5-eletroduto-qtd">Qtd. de eletrodutos</label>
+                    <input
+                      type="number"
+                      id="q5-eletroduto-qtd"
+                      min="0"
+                      step="1"
+                      placeholder="Ex.: 20"
+                    />
+                  </div>
+                </div>
+
+                <!-- linha com modelo/quantidade de rack -->
+                <div class="form-row">
+                  <div class="form-group"><!-- modelo do rack -->
+                    <label for="q5-rack-modelo">Modelo do rack</label>
+                    <input
+                      type="text"
+                      id="q5-rack-modelo"
+                      placeholder="Ex.: Rack 19/24U, parede/piso, etc."
+                    />
+                  </div>
+
+                  <div class="form-group"><!-- quantidade de racks -->
+                    <label for="q5-rack-qtd">Qtd. de racks</label>
+                    <input
+                      type="number"
+                      id="q5-rack-qtd"
+                      min="0"
+                      step="1"
+                      placeholder="Ex.: 1"
+                    />
+                  </div>
+                </div>
+
+                <!-- linha com modelo/quantidade de nobreak -->
+                <div class="form-row">
+                  <div class="form-group"><!-- modelo do nobreak -->
+                    <label for="q5-nobreak-modelo">Modelo do nobreak</label>
+                    <input
+                      type="text"
+                      id="q5-nobreak-modelo"
+                      placeholder="Ex.: Nobreak 1500 VA online, marca X..."
+                    />
+                  </div>
+
+                  <div class="form-group"><!-- quantidade de nobreaks -->
+                    <label for="q5-nobreak-qtd">Qtd. de nobreaks</label>
+                    <input
+                      type="number"
+                      id="q5-nobreak-qtd"
+                      min="0"
+                      step="1"
+                      placeholder="Ex.: 1"
+                    />
+                  </div>
+                </div>
+
+                <!-- linha com descrição de serralheria -->
+                <div class="form-row">
+                  <div class="form-group full-width"><!-- descrição dos serviços de serralheria -->
+                    <label for="q5-serralheria-descricao">Descrição da serralheria</label>
+                    <textarea
+                      id="q5-serralheria-descricao"
+                      rows="2"
+                      placeholder="Descrever detalhes de suportes, fixações, estruturas metálicas, etc."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <!-- linha com observações da instalação elétrica --> <!-- comentário identificando a linha de observações de instalação elétrica -->
+                <div class="form-row"> <!-- linha de formulário que agrupa o campo de observações de instalação elétrica -->
+                  <div class="form-group full-width"><!-- grupo em largura total para o campo de observações sobre instalação elétrica -->
+                    <label for="q5-instalacao-eletrica-obs">Observações de instalação elétrica</label> <!-- rótulo do campo de observações de instalação elétrica -->
+                    <textarea
+                      id="q5-instalacao-eletrica-obs"
+                      rows="2"
+                      placeholder="Observações específicas de quadros, circuitos, disjuntores, cabeamento de força, etc."
+                    ></textarea> <!-- área de texto onde o usuário descreve observações da instalação elétrica -->
+                  </div> <!-- fim do grupo full-width para o campo de observações -->
+                </div> <!-- fim da linha de formulário das observações de instalação elétrica -->
+
+                <!-- NOVO BLOCO: Lista de materiais de infraestrutura --> <!-- comentário indicando o início da nova seção de lista de materiais -->
+                <div class="form-row"> <!-- linha de formulário que conterá a tabela de lista de materiais -->
+                  <div class="form-group full-width"> <!-- grupo em largura total para que a tabela ocupe toda a largura do formulário -->
+                    <label>Lista de materiais (Infraestrutura)</label> <!-- título/legenda para a tabela de materiais de infraestrutura -->
+
+                    <div class="table-wrapper"> <!-- contêiner com rolagem para aplicar o estilo padrão de tabelas (bordas e scroll) -->
+                      <table
+                        class="table"
+                        id="infra-lista-materiais-tabela"
+                      > <!-- abertura da tabela de lista de materiais -->
+                        <thead> <!-- cabeçalho da tabela com os títulos das colunas -->
+                          <tr> <!-- linha de cabeçalho contendo os nomes das colunas -->
+                            <th>Equipamento / material</th> <!-- coluna para o nome do equipamento ou material -->
+                            <th>Modelo</th> <!-- coluna para o modelo, referência ou descrição adicional do material -->
+                            <th>Quantidade</th> <!-- coluna para a quantidade de unidades do material -->
+                            <th>Fabricante</th> <!-- coluna para o nome do fabricante do material -->
+                            <th class="infra-lista-materiais-acoes-header"></th> <!-- cabeçalho vazio reservado para a coluna de ações (ícone de lixeira) -->
+                          </tr> <!-- fim da linha de cabeçalho -->
+                        </thead> <!-- fim do cabeçalho da tabela -->
+                        <tbody
+                          id="infra-lista-materiais-tbody"
+                        > <!-- abertura do corpo da tabela de materiais -->
+                          <tr class="infra-lista-materiais-linha"> <!-- linha inicial padrão da lista de materiais; servirá como primeira linha editável e como molde para novas linhas -->
+                            <td> <!-- célula da linha dedicada ao campo de equipamento/material -->
+                              <input
+                                type="text"
+                                class="infra-lista-materiais-equipamento"
+                                placeholder="Ex.: Eletrocalha, Rack, Nobreak..."
+                              /> <!-- fim do input de equipamento/material -->
+                            </td> <!-- fim da célula de equipamento/material -->
+                            <td> <!-- célula da linha dedicada ao campo de modelo -->
+                              <input
+                                type="text"
+                                class="infra-lista-materiais-modelo"
+                                placeholder="Ex.: Marca / modelo / especificação"
+                              /> <!-- fim do input de modelo -->
+                            </td> <!-- fim da célula de modelo -->
+                            <td> <!-- célula da linha dedicada ao campo de quantidade -->
+                              <input
+                                type="number"
+                                class="infra-lista-materiais-quantidade"
+                                min="0"
+                                step="1"
+                                placeholder="Ex.: 1"
+                              /> <!-- fim do input numérico de quantidade -->
+                            </td> <!-- fim da célula de quantidade -->
+                            <td> <!-- célula da linha dedicada ao campo de fabricante -->
+                              <input
+                                type="text"
+                                class="infra-lista-materiais-fabricante"
+                                placeholder="Ex.: Fabricante principal do material"
+                              /> <!-- fim do input de fabricante -->
+                            </td> <!-- fim da célula de fabricante -->
+                            <td class="infra-lista-materiais-acoes"> <!-- célula dedicada às ações da linha (por enquanto, apenas remover) -->
+                              <button
+                                type="button"
+                                class="btn btn-excluir btn-small infra-remover-linha"
+                                title="Remover linha"
+                              >
+                                🗑️ <!-- ícone visual de lixeira representando a ação de excluir/remover a linha -->
+                              </button> <!-- fim do botão de remoção da linha -->
+                            </td> <!-- fim da célula de ações da linha -->
+
+                          </tr> <!-- fim da linha inicial da lista de materiais -->
+                        </tbody> <!-- fim do corpo da tabela de materiais -->
+                      </table> <!-- fim da tabela de lista de materiais -->
+                    </div> <!-- fim do wrapper de tabela que fornece rolagem e bordas padronizadas -->
+
+                    <div class="lista-materiais-acoes"> <!-- contêiner para os botões de ação relacionados à lista de materiais -->
+                      <button
+                        type="button"
+                        id="btn-infra-adicionar-linha"
+                        class="btn btn-primary btn-small"
+                      >
+                        Nova linha <!-- texto exibido no botão para o usuário -->
+                      </button> <!-- fim do botão que adiciona uma nova linha de material -->
+                    </div> <!-- fim da área de ações da lista de materiais -->
+                  </div> <!-- fim do grupo full-width que envolve a tabela e o botão -->
+                </div> <!-- fim da linha de formulário que contém toda a lista de materiais -->
+
+              <!-- Título da seção de localização e imagens da avaliação -->
+              <h3 class="form-section-title">Localização / Imagens</h3> <!-- título visual da seção de fotos -->
+
+              <!-- Contêiner geral da seção de imagens de localização -->
+<div
+                class="image-section"                 
+                id="localizacao-imagens-section"      
+              >
+                <!-- [NOVO] Lista escalável de imagens (não usa URL manual) -->
+                <!-- A UI nova será renderizada via JS dentro deste container -->
+                <div id="localizacao-imagens-rows" class="image-row">
+                  <!-- [NOVO] As linhas (miniatura+descrição+ações) serão inseridas aqui pelo JS -->
+                </div>
+
+                <!-- [NOVO] Input file compartilhado (usado pelo botão "Selecionar imagem") -->
+                <input
+                  type="file"
+                  id="localizacao-imagens-file-input"
+                  accept="image/*"
+                  class="hidden"
+                />
+
+                <!-- ========================= RODAPÉ DA SEÇÃO ========================= -->
+                <div class="image-section-footer">               <!-- rodapé com botão para futuras linhas adicionais -->
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-small image-add-row-btn"
+                    id="btn-localizacao-adicionar-imagem"
+                    title="Adicionar nova imagem à seção de localização"
+                  >
+                    Nova imagem                                  <!-- botão para adicionar linha de imagem -->
+                  </button>
+                </div>
+              </div>
+
+              <!-- Seção: Pré-requisitos -->
+              <h3 class="form-section-title">Pré-requisitos</h3>
+
+              <div class="form-row"><!-- linha com flags de trabalho em altura, plataforma e fora horário comercial -->
+                <div class="form-group"><!-- flag: trabalho em altura -->
+                  <label for="pre-trabalho-altura">Trabalho em altura?</label>
+                  <select id="pre-trabalho-altura">
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+
+                <div class="form-group"><!-- flag: plataforma -->
+                  <label for="pre-plataforma">Necessita plataforma?</label>
+                  <select id="pre-plataforma">
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+
+                <div class="form-group invisible-keep-space"><!-- modelo da plataforma -->
+                  <label for="pre-plataforma-modelo">Modelo da plataforma</label>
+                  <input
+                    type="text"
+                    id="pre-plataforma-modelo"
+                    placeholder="Ex.: Tesoura, articulada, etc."
+                  />
+                </div>
+              </div>
+
+              <div class="form-row"><!-- linha com modelo/dias de plataforma e veículo Technical Quotation Evaluation -->
+
+                <div class="form-group"><!-- flag: fora do horário comercial -->
+                  <label for="pre-fora-horario-comercial">Fora do horário comercial?</label>
+                  <select id="pre-fora-horario-comercial">
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+
+                <div class="form-group"><!-- dias de uso da plataforma -->
+                  <label for="pre-plataforma-dias">Dias de uso da plataforma</label>
+                  <input
+                    type="number"
+                    id="pre-plataforma-dias"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 2"
+                  />
+                </div>
+
+                <div class="form-group"><!-- flag: veículo Technical Quotation Evaluation -->
+                  <label for="pre-veiculo-quotation_evaluation">Veículo Technical Quotation Evaluation?</label>
+                  <select id="pre-veiculo-quotation_evaluation">
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row"><!-- linha com container de materiais -->
+                <div class="form-group"><!-- flag: container de materiais -->
+                  <label for="pre-container-materiais">Container de materiais?</label> <!-- rótulo -->
+                  <select id="pre-container-materiais"><!-- select Sim/Não -->
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+              </div>
+
+                            <!-- Seção: Horas / Dias de Trabalho (Tabela 4) -->
+              <h3 class="form-section-title">Horas / Dias de Trabalho</h3> <!-- título seção horas -->
+
+              <!-- Dias normais por função -->
+              <div class="form-row"><!-- linha com dias de encarregado, instalador, auxiliar -->
+                <div class="form-group"><!-- dias de encarregado -->
+                  <label for="encarregado-dias">Dias de encarregado</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="encarregado-dias"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 1"
+                  />
+                </div>
+
+                <div class="form-group"><!-- dias de instalador -->
+                  <label for="instalador-dias">Dias de instalador</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="instalador-dias"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 2"
+                  />
+                </div>
+
+                <div class="form-group"><!-- dias de auxiliar -->
+                  <label for="auxiliar-dias">Dias de auxiliar</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="auxiliar-dias"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 1"
+                  />
+                </div>
+
+                <div class="form-group"><!-- dias de técnico instalação -->
+                  <label for="tecnico-de-instalacao-dias">Dias técnico instalação</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="tecnico-de-instalacao-dias"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 1"
+                  />
+                </div>
+
+                <div class="form-group"><!-- dias de técnico segurança -->
+                  <label for="tecnico-em-seguranca-dias">Dias técnico segurança</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="tecnico-em-seguranca-dias"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 1"
+                  />
+                </div>
+
+              </div>
+              <!-- Horas extras por função -->
+              <h4 class="form-section-title">Horas extras (por função)</h4> <!-- subtítulo horas extras -->
+
+              <div class="form-row"><!-- linha com horas extras de encarregado, instalador, auxiliar -->
+                <div class="form-group"><!-- horas extras encarregado -->
+                  <label for="encarregado-hora-extra">Horas extras - encarregado</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="encarregado-hora-extra"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 2"
+                  />
+                </div>
+
+                <div class="form-group"><!-- horas extras instalador -->
+                  <label for="instalador-hora-extra">Horas extras - instalador</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="instalador-hora-extra"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 2"
+                  />
+                </div>
+
+                <div class="form-group"><!-- horas extras auxiliar -->
+                  <label for="auxiliar-hora-extra">Horas extras - auxiliar</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="auxiliar-hora-extra"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 2"
+                  />
+                </div>
+              
+
+              
+                <div class="form-group"><!-- horas extras técnico instalação -->
+                  <label for="tecnico-de-instalacao-hora-extra">Horas extras - técnico instalação</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="tecnico-de-instalacao-hora-extra"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 2"
+                  />
+                </div>
+
+                <div class="form-group"><!-- horas extras técnico segurança -->
+                  <label for="tecnico-em-seguranca-hora-extra">Horas extras - técnico segurança</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="tecnico-em-seguranca-hora-extra"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 2"
+                  />
+                </div>
+
+              </div>
+
+              <!-- Trabalho em domingos/feriados por função -->
+              <h4 class="form-section-title">Domingos / feriados (por função)</h4> <!-- subtítulo domingos/feriados -->
+
+              <div class="form-row"><!-- linha com horas domingo de encarregado, instalador, auxiliar -->
+                <div class="form-group"><!-- trabalho domingo encarregado -->
+                  <label for="encarregado-trabalho-domingo">Domingos/feriados - encarregado (horas)</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="encarregado-trabalho-domingo"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 0"
+                  />
+                </div>
+
+                <div class="form-group"><!-- trabalho domingo instalador -->
+                  <label for="instalador-trabalho-domingo">Domingos/feriados - instalador (horas)</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="instalador-trabalho-domingo"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 0"
+                  />
+                </div>
+
+                <div class="form-group"><!-- trabalho domingo auxiliar -->
+                  <label for="auxiliar-trabalho-domingo">Domingos/feriados - auxiliar (horas)</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="auxiliar-trabalho-domingo"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 0"
+                  />
+                </div>
+              
+                <div class="form-group"><!-- trabalho domingo técnico instalação -->
+                  <label for="tecnico-de-instalacao-trabalho-domingo">Domingos/feriados - técnico instalação (horas)</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="tecnico-de-instalacao-trabalho-domingo"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 0"
+                  />
+                </div>
+
+                <div class="form-group"><!-- trabalho domingo técnico segurança -->
+                  <label for="tecnico-em-seguranca-trabalho-domingo">Domingos/feriados - técnico segurança (horas)</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="tecnico-em-seguranca-trabalho-domingo"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 0"
+                  />
+                </div>
+              </div>
+
+              <!-- Seção: Prazo de instalação -->
+              <h3 class="form-section-title">Prazo de Instalação</h3> <!-- título seção prazo -->
+
+              <div class="form-row"><!-- linha com cronograma, dias instalação e As Built -->
+                <div class="form-group"><!-- flag: cronograma de execução -->
+                  <label for="cronograma-execucao">Possui cronograma de execução?</label> <!-- rótulo -->
+                  <select id="cronograma-execucao"><!-- select Sim/Não -->
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+
+                <div class="form-group"><!-- dias instalação -->
+                  <label for="dias-instalacao">Dias para instalação</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="dias-instalacao"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 10"
+                  />
+                </div>
+
+                <div class="form-group"><!-- flag: As Built -->
+                  <label for="as-built">As Built?</label> <!-- rótulo -->
+                  <select id="as-built"><!-- select Sim/Não -->
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+
+                <div class="form-group"><!-- dias para entrega do relatório -->
+                  <label for="dias-entrega-relatorio">Dias para entrega do relatório</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="dias-entrega-relatorio"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 5"
+                  />
+                </div>
+
+                <div class="form-group"><!-- flag: ART -->
+                  <label for="art">ART?</label> <!-- rótulo -->
+                  <select id="art"><!-- select Sim/Não -->
+                    <option value="">Selecione...</option>
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Seção: Alimentação / Refeições -->
+              <h3 class="form-section-title">Alimentação em casos especiais ex.: ausência de restaurante, feriados, domingos</h3> <!-- título seção alimentação -->
+
+              <div class="form-row"><!-- linha com quantidade de almoços e lanches -->
+                <div class="form-group"><!-- quantidade de almoços -->
+                  <label for="almoco-qtd">Quantidade de almoços previstos</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="almoco-qtd"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 5"
+                  />
+                </div>
+
+                <div class="form-group"><!-- quantidade de lanches -->
+                  <label for="lanche-qtd">Quantidade de lanches previstos</label> <!-- rótulo -->
+                  <input
+                    type="number"
+                    id="lanche-qtd"
+                    min="0"
+                    step="1"
+                    placeholder="Ex.: 5"
+                  />
+                </div>
+              </div>
+            </form>
+          </section>
+        </main>
+      </section>
+    </div>
+    <!-- Modal de troca de senha obrigatória -->
+    <div id="password-modal-overlay" class="hidden"> <!-- overlay: começa escondido, JS remove a classe hidden -->
+        <div class="password-modal"> <!-- caixa branca centralizada do modal -->
+            <h2 class="password-modal__title">Trocar senha padrão</h2> <!-- título do modal -->
+            <p class="password-modal__text">
+                Por segurança, você precisa trocar a senha padrão antes de continuar usando o sistema.
+            </p> <!-- texto explicativo -->
+
+            <form id="password-change-form" class="password-modal__form"> <!-- formulário que o JS vai ouvir no submit -->
+                <label for="senha_atual" class="password-modal__label">Senha atual</label> <!-- rótulo da senha atual -->
+                <input
+                    type="password"
+                    id="senha_atual"
+                    class="password-modal__input"
+                    required
+                > <!-- campo para digitar a senha atual -->
+
+                <label for="nova_senha" class="password-modal__label">Nova senha</label> <!-- rótulo da nova senha -->
+                <input
+                    type="password"
+                    id="nova_senha"
+                    class="password-modal__input"
+                    minlength="6"
+                    required
+                > <!-- campo da nova senha, com mínimo de 6 caracteres -->
+
+                <p
+                    id="password-modal-error"
+                    class="password-modal__error hidden"
+                >
+                    Senha atual incorreta ou erro ao salvar a nova senha.
+                </p> <!-- área de mensagem de erro, começa escondida -->
+
+                <div class="password-modal__actions"> <!-- container dos botões -->
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Salvar nova senha
+                    </button> <!-- botão principal, usa o mesmo estilo de botão primário do sistema -->
+                </div>
+            </form>
+        </div>
+    </div>
+        <!-- Modal de gestão de usuários (somente administradores) --> <!-- comentário explicando o bloco de gestão de usuários -->
+    <div id="users-modal-overlay" class="modal-overlay hidden"> <!-- overlay escuro que cobre a tela quando a gestão de usuários está aberta -->
+      <div class="modal users-modal"> <!-- caixa branca principal do modal de usuários -->
+        <h2 class="modal-title">Gestão de usuários</h2> <!-- título do modal de gestão de usuários -->
+        <p class="modal-text">
+          Ative ou desative usuários e gere senhas temporárias para primeiro acesso.
+        </p> <!-- texto explicativo resumindo o que pode ser feito no modal -->
+
+        <div class="table-wrapper users-table-wrapper"> <!-- contêiner com rolagem para a tabela de usuários -->
+          <table class="table"> <!-- tabela reaproveitando o estilo geral de tabelas -->
+            <thead> <!-- cabeçalho da tabela de usuários -->
+              <tr> <!-- linha de títulos das colunas -->
+                <th>ID</th> <!-- coluna com o identificador do usuário -->
+                <th>Nome</th> <!-- coluna com o nome completo -->
+                <th>Usuário</th> <!-- coluna com o username (login) -->
+                <th>E-mail</th> <!-- coluna com o e-mail -->
+                <th>Ativo</th> <!-- coluna com o status ativo/inativo -->
+                <th>Ações</th> <!-- coluna com os botões de ação -->
+              </tr>
+            </thead>
+            <tbody id="usuarios-tbody"> <!-- corpo da tabela onde as linhas de usuários serão geradas via JavaScript -->
+              <tr> <!-- linha padrão exibida enquanto carrega -->
+                <td colspan="6" class="table-empty">
+                  Carregando usuários...
+                </td> <!-- mensagem de carregamento padrão -->
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p id="usuarios-feedback" class="form-feedback"></p> <!-- parágrafo usado para exibir mensagens de erro/sucesso das ações -->
+
+        <div class="modal-actions"> <!-- rodapé do modal com botões de ação -->
+          <button
+            type="button"
+            id="btn-fechar-usuarios"
+            class="btn btn-secondary btn-small"
+          >
+            Fechar
+          </button> <!-- botão para fechar o modal de usuários -->
+        </div>
+      </div>
+    </div>
+    <!-- Fim do modal de gestão de usuários --> <!-- comentário encerrando o bloco de gestão de usuários -->
+    <!-- Fim do modal de troca de senha obrigatória --> <!-- comentário encerrando o bloco -->
+    <!-- Script principal da aplicação -->
+    <script src="/static/app.js"></script>
+
+    <!-- ==================== MODAL GLOBAL DE CÂMERA (GETUSERMEDIA) ==================== --> <!-- modal reutilizável para capturar foto no navegador -->
+    <div
+      id="camera-modal"
+      class="camera-modal"
+    >
+      <div
+        id="camera-modal-backdrop"
+        class="camera-backdrop"   
+      ></div>
+
+      <div
+        class="camera-content"    
+      >
+        <div
+          class="camera-header"   
+        >
+          <h3
+            class="camera-title"  
+          >
+            Câmera
+          </h3>
+
+          <button
+            type="button"         
+            id="camera-btn-fechar" 
+            class="btn btn-secondary btn-small camera-close-btn"
+          >
+            Fechar
+          </button>
+        </div>
+
+        <video
+          id="camera-video"
+          class="camera-video"
+          autoplay            
+          playsinline         
+          muted               
+        ></video>
+
+        <canvas
+          id="camera-canvas"  
+          class="camera-canvas"
+        ></canvas>
+
+        <div
+          class="camera-actions"
+        >
+          <button
+            type="button"       
+            id="camera-btn-capturar"
+            class="btn btn-primary" 
+          >
+            Capturar foto
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- ================== FIM DO MODAL GLOBAL DE CÂMERA (GETUSERMEDIA) ================== -->
+
+      <!-- ==================== MODAL GLOBAL DE PRÉVIA DE IMAGEM ==================== -->
+    <div
+      id="image-preview-modal" 
+      class="image-preview-modal"
+    >
+      <div
+        class="image-preview-backdrop"
+      ></div>
+      <div
+        class="image-preview-content" 
+      >
+        <button
+          type="button"               
+          class="image-preview-close" 
+          aria-label="Fechar prévia"  
+        >
+          &times;                                  <!-- ícone de “X” simples usando caractere HTML -->
+        </button>
+
+        <img
+          src=""                      
+          alt="Prévia ampliada"       
+          class="image-preview-img"   
+        />
+
+        <div
+          class="image-preview-caption"
+        >
+          <!-- A descrição da imagem será inserida aqui via JS -->
+        </div>
+      </div>
+    </div>
+    <!-- ================== FIM DO MODAL GLOBAL DE PRÉVIA DE IMAGEM ================== -->
+
+  </body>
+</html>

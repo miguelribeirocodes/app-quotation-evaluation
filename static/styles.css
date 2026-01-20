@@ -1,0 +1,1830 @@
+:root {
+  /* Cor principal do sistema (azul de destaque) */
+  --nt-primary: #0b71f1;
+  /* Azul escuro do sistema para cabeçalhos */
+  --nt-primary-dark: #0a2b4e;
+  /* Cor de fundo geral da página */
+  --nt-background: #f3f5fb;
+  /* Cor básica de texto */
+  --nt-text: #111827;
+  /* Cor de texto secundário */
+  --nt-text-muted: #6b7280;
+  /* Cor do cartão (fundos brancos) */
+  --nt-card: #ffffff;
+  /* Borda extremamente suave */
+  --nt-border-soft: #e5e7eb;
+  /* Cor de erro */
+  --nt-danger: #dc2626;
+  /* Cor de sucesso */
+  --nt-success: #16a34a;
+  /* Raio padrão dos cantos */
+  --nt-radius-lg: 18px;
+  /* Sombra suave dos cartões */
+  --nt-shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.12);
+}
+
+/* Reset básico para remover margens/paddings padrão */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Estilo base do body */
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: radial-gradient(circle at top left, #e0ecff, var(--nt-background));
+  color: var(--nt-text);
+  min-height: 100vh;
+}
+
+/* Contêiner raiz que ocupa a tela toda */
+#app-root {
+  min-height: 100vh;
+}
+
+/* Classe genérica para cada "tela" (login ou app principal) */
+.screen {
+  min-height: 100vh;
+}
+
+/* Utilitário para esconder seções */
+.hidden {
+  display: none !important;
+}
+
+.invisible-keep-space{       /* nova classe para esconder o conteúdo mantendo o espaço reservado */
+  visibility: hidden;         /* o elemento fica invisível, mas continua ocupando seu espaço no layout */
+}
+
+/* ========================== TELA DE LOGIN ========================== */
+
+.login-wrapper {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 40px 16px;
+  display: flex;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.login-card {
+  background: var(--nt-card);
+  border-radius: 24px;
+  padding: 32px 28px;
+  box-shadow: var(--nt-shadow-soft);
+  width: 100%;
+  background-color: #0a2b4e;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-logo {
+  width: 120px;
+  height: auto;
+  margin-top: 20px;
+  margin-bottom: 12px;
+}
+
+.login-logo-background{
+  width: auto;
+  height: auto;
+  /*background-color: #2563eb;*/
+  border-radius: 24px;
+}
+
+.login-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  /*color: var(--nt-primary-dark);*/
+  color: #fff;
+}
+
+.login-subtitle {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  /*color: var(--nt-text-muted);*/
+  color: #fff;
+}
+
+.login-form {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-form label {
+  color: #ffffff;
+}
+
+.login-hint {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--nt-text-muted);
+  text-align: center;
+  color: #fff;
+}
+
+/* ========================== LOGIN OFFLINE ========================== */
+
+/* Separador "ou" entre os botões */
+.login-divider {
+  display: flex;
+  align-items: center;
+  margin: 16px 0;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.login-divider span {
+  padding: 0 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Botão outline (borda, sem fundo) */
+.btn-outline {
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  color: #000000;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Guia explicativo do modo offline */
+.offline-guide {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.offline-guide-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.offline-guide-text {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.4;
+}
+
+.offline-guide-text strong {
+  color: #ffffff;
+}
+
+/* ========================== LAYOUT PRINCIPAL ======================= */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: var(--nt-primary-dark);
+  color: #f9fafb;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.3);
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-logo {
+  width: 65px;
+  height: auto;
+  padding: 6px;
+}
+
+.topbar-text h1 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.topbar-text span {
+  font-size: 0.8rem;
+  color: #cbd5f5;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Badge indicador de modo offline */
+.offline-badge {
+  background: #f97316;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: pulse-offline 2s ease-in-out infinite;
+}
+
+@keyframes pulse-offline {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.user-role {
+  font-size: 0.8rem;
+  color: #d1d5db;
+}
+
+/* ========================== LAYOUT DO CONTEÚDO ==================== */
+
+.main-layout {                                   /* contêiner principal que segura os cards da aplicação */
+  max-width: 1200px;                            /* limita a largura máxima do conteúdo no centro da tela */
+  margin: 24px auto 40px;                       /* dá margem superior e inferior e centraliza horizontalmente */
+  padding: 0 16px 24px;                         /* espaçamento interno nas laterais e embaixo */
+  display: flex;                                /* usa flexbox para organizar os cards */
+  flex-direction: column;                       /* força os cards a ficarem um embaixo do outro, em coluna */
+  gap: 22px;                                    /* espaço vertical entre o card de lista e o card de formulário */
+}
+
+/* Cartões principais */
+.card {
+  background: var(--nt-card);
+  border-radius: var(--nt-radius-lg);
+  box-shadow: var(--nt-shadow-soft);
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.card-max{
+  max-height: 392px;
+}
+
+.card-user-max{
+  max-height: 743px;
+}
+
+/* Mobile: não deixar os cards "esticados" */
+@media (max-width: 720px) {                      /* regra para celular */
+  .main-layout {                                 /* ajusta espaçamento geral no mobile */
+    margin: 16px auto 28px;                      /* reduz margens verticais */
+    padding: 0 12px 18px;                        /* reduz padding lateral */
+    gap: 14px;                                   /* reduz espaço entre cards */
+  }
+
+  .card {                                        /* sobrescreve o card no mobile */
+    min-height: unset !important;                /* remove min-height fixo (evita “esticado”) */
+    padding: 16px 14px;                          /* compacta padding no celular */
+  }
+}
+
+/* Ajuste das duas colunas */
+.card-list {
+  overflow: hidden;
+}
+.card-list-rascunho{
+  overflow: hidden;
+  background: #fffbc8;                         
+  min-height: 0;
+}
+
+/* ======================= RASCUNHOS: ACCORDION ===================== */
+
+/* Ajusta o header da seção de rascunhos para caber o botão + ações */
+.rascunhos-header {                               /* aplica ao header só do card de rascunhos */
+  align-items: center;                            /* alinha verticalmente os elementos do header */
+  gap: 12px;                                      /* espaço entre o botão principal e as ações à direita */
+}
+
+/* Botão que funciona como "aba" de abrir/fechar */
+.rascunhos-toggle {                               /* estiliza o botão de toggle do accordion */
+  flex: 1;                                        /* ocupa todo o espaço disponível do header (menos as ações) */
+  display: flex;                                  /* organiza o conteúdo interno em linha */
+  align-items: center;                            /* alinha verticalmente título e badge */
+  justify-content: space-between;                 /* separa textos à esquerda e indicadores à direita */
+  gap: 12px;                                      /* espaço interno entre esquerda e direita */
+  border: none;                                   /* remove borda padrão do botão */
+  background: transparent;                        /* fundo transparente para parecer parte do card */
+  padding: 0;                                     /* remove padding padrão do botão */
+  cursor: pointer;                                /* mostra mãozinha indicando que é clicável */
+}
+
+/* Bloco de textos à esquerda do botão */
+.rascunhos-toggle-left {                          /* agrupa h2 e descrição do cabeçalho de rascunhos */
+  display: flex;                                  /* usa flexbox */
+  flex-direction: column;                         /* empilha título e subtítulo em coluna */
+  gap: 2px;                                       /* espaço pequeno entre título e subtítulo */
+}
+
+/* Bloco de indicadores à direita (badge + chevron) */
+.rascunhos-toggle-right {                         /* agrupa badge e ícone de seta */
+  display: flex;                                  /* exibe em linha */
+  align-items: center;                            /* alinha verticalmente ao centro */
+  gap: 8px;                                       /* espaço entre badge e seta */
+}
+
+/* Badge de quantidade de rascunhos */
+.rascunhos-count-badge {                          /* bolinha com quantidade de rascunhos */
+  display: none;                                  /* por padrão fica escondida (só aparece quando colapsado) */
+  min-width: 26px;                                /* largura mínima para acomodar 2 dígitos */
+  height: 22px;                                   /* altura fixa da badge */
+  padding: 0 8px;                                 /* espaço horizontal interno para o texto */
+  border-radius: 999px;                           /* formato de pílula */
+  background: #2563eb;                            /* fundo azul em destaque */
+  color: #ffffff;                                 /* texto branco */
+  font-size: 0.75rem;                             /* fonte um pouco menor */
+  font-weight: 600;                               /* texto mais forte para legibilidade */
+  display: inline-flex;                           /* centraliza o número na vertical e horizontal */
+  align-items: center;                            /* centra verticalmente */
+  justify-content: center;                        /* centra horizontalmente */
+}
+
+/* Ícone de seta à direita */
+.rascunhos-chevron {                              /* seta que indica abrir/fechar */
+  font-size: 0.9rem;                              /* tamanho da seta */
+  transition: transform 0.18s ease;               /* animação suave ao girar */
+}
+
+/* Ações (Recarregar / Limpar tudo) ficam alinhadas à direita do cabeçalho */
+.rascunhos-header-actions {                       /* contêiner dos botões de ação */
+  display: flex;                                  /* exibe os botões em linha */
+  gap: 8px;                                       /* espaço entre eles */
+}
+
+/* Corpo interno do accordion */
+.rascunhos-panel {                                /* painel onde fica a tabela de rascunhos */
+  margin-top: 8px;                                /* espaço entre o header e a tabela */
+}
+
+/* Estado colapsado: esconde o painel e mostra a badge */
+.card-list-rascunho.rascunhos-collapsed .rascunhos-panel {
+  display: none;                                  /* esconde o corpo do card quando colapsado */
+}
+
+/* Quando colapsado, a badge aparece (avisa quantos rascunhos existem) */
+.card-list-rascunho.rascunhos-collapsed .rascunhos-count-badge {
+  display: inline-flex;                           /* exibe a badge no estado colapsado */
+}
+
+/* Quando colapsado, gira a seta para cima (visualização de "fechado") */
+.card-list-rascunho.rascunhos-collapsed .rascunhos-chevron {
+  transform: rotate(180deg);                      /* inverte a direção da seta */
+}
+
+/* Ajuste para telas menores: deixa tudo em coluna no header */
+@media (max-width: 720px) {                       /* regra específica para celulares/tablets menores */
+  .rascunhos-header {                             /* cabeçalho do card de rascunhos */
+    flex-direction: column;                       /* empilha o botão e as ações em coluna */
+    align-items: stretch;                         /* faz o botão ocupar toda a largura */
+  }
+
+  .rascunhos-header-actions {                     /* contêiner dos botões de ação */
+    justify-content: flex-end;                    /* alinha os botões à direita abaixo do cabeçalho */
+  }
+}
+
+.card-form {                                    /* card específico do formulário principal */
+  max-width: 820px;                             /* limita a largura para leitura mais confortável em telas grandes */
+  margin: 0 auto;                               /* centraliza o card dentro do main-layout */
+}
+
+.card-form #avaliacao-feedback {               /* mensagem de feedback no topo do card de formulário */
+  margin-bottom: 8px;                           /* espaço entre o texto de feedback e a barra de botões */
+}
+
+.card-form .form-actions {                      /* barra de botões "Nova avaliação" / "Salvar avaliação" do formulário */
+  justify-content: flex-start;                  /* alinha os botões à esquerda, perto do título e das abas */
+  margin-bottom: 4px;                           /* reduz o espaço logo abaixo dos botões para compactar o topo */
+}
+
+.card-form .form-actions .btn {                 /* botões principais do formulário */
+  font-size: 0.85rem;                           /* fonte um pouco menor para caber melhor mesmo com textos maiores */
+  padding-inline: 14px;                         /* ajusta o padding horizontal para ficar mais equilibrado */
+}
+
+.card-form .card-header {                       /* cabeçalho com título do formulário + texto explicativo */
+  background: #eef2ff;
+  /* background: #fff563;
+  border-radius: 12px;                          /* cantos arredondados, combinando com o estilo geral do app */
+  padding: 10px 12px;                           /* espaçamento interno para o título/subtítulo respirarem */
+  margin-top: 10px;                             /* respiro entre as abas e o cabeçalho */
+}
+
+.card-form .card-header h2 {                    /* título principal do formulário (objeto da avaliação) */
+  font-size: 1rem;                              /* um pouco menor para reduzir quebras de linha excessivas */
+}
+
+.card-form .card-header .card-subtitle {        /* texto explicativo ao lado do título */
+  max-width: 260px;                             /* limita a largura para não ficar esticado demais em telas largas */
+}
+
+/* Cabeçalho de cada cartão */
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card-header h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--nt-primary-dark);
+}
+
+.card-subtitle {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: var(--nt-text-muted);
+}
+
+/* ========================== TABELA DE AVALIAÇÕES ================= */
+
+.table-wrapper {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  border-radius: 14px;
+  border: 1px solid var(--nt-border-soft);
+  background: #f9fafb;
+}
+
+.table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  table-layout: auto; /* garante que as larguras definidas abaixo sejam respeitadas */
+}
+
+.table th,
+.table td {                                /* aplica às células (cabeçalho e corpo) da tabela de usuários */
+  white-space: nowrap;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+/* Largura fixa das colunas da tabela de avaliações:
+   1: ID, 2: Objeto, 3: Cliente, 4: Data, 5: Local, 6: Status */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: auto;
+  text-align: center;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: auto;
+  text-align: center;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: auto;
+  text-align: center;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: auto;
+  text-align: center;
+  /* word-break: break-word; quebra de linha pelo @ do email */
+}
+
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: auto;
+  text-align: center;
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: auto;
+  text-align: center;
+}
+
+.table thead {
+  background: #eef2ff;
+}
+
+.table th,
+.table td {
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.table th {
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid var(--nt-border-soft);
+}
+
+.table tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.table tbody tr:hover {
+  background: #e5f0ff;
+}
+
+.table-empty {
+  text-align: center;
+  color: var(--nt-text-muted);
+  font-style: italic;
+}
+
+/* ========================== FORMULÁRIOS =========================== */
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-row {
+  display: flex;                               /* mantém os campos lado a lado */
+  flex-wrap: wrap;                             /* permite que quebrem para a linha de baixo */
+  gap: 12px;                                   /* espaço entre os .form-group */
+  border: 1px dashed rgb(52, 164, 255);        /* sua borda tracejada */
+  padding: 8px 10px;                           /* “gap” entre a borda e os campos */
+  border-radius: 10px;                         /* opcional: cantos arredondados */
+  box-sizing: border-box;                      /* inclui padding dentro da largura total */
+}
+
+/* espaço vertical entre uma linha de campos e outra */
+.form-row + .form-row {
+  margin-top: 10px;                         /* “gap” entre as caixas com borda          */
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1;
+  gap: 4px;
+}
+
+.form-group.full-width {
+  flex: 1 0 100%;
+}
+
+.form-section-title {                           /* título de cada grande seção do formulário */
+  margin-top: 18px;                             /* espaço antes da seção para separá-la do bloco anterior */
+  margin-bottom: 6px;                           /* pequena distância até os campos da própria seção */
+  padding-top: 10px;                            /* respiro interno acima do texto */
+  border-top: 5px solid rgba(0, 106, 255, 0.7); /* linha tracejada separando visualmente as seções */
+  font-size: 0.9rem;                            /* um pouco maior que o label padrão */
+  font-weight: 600;                             /* deixa o texto mais forte para parecer um subtítulo */
+  color: var(--nt-primary-dark);                /* mesma cor dos títulos de card, para consistência */
+}
+
+/* ==================== SEÇÃO DE IMAGENS (LOCALIZAÇÃO) ==================== */
+.image-section {                              /* contêiner geral da seção de imagens */
+  display: flex;                              /* usa flexbox para organizar as linhas na vertical */
+  flex-direction: column;                     /* garante que as linhas fiquem empilhadas (uma abaixo da outra) */
+  gap: 12px;                                  /* espaço vertical entre as linhas de imagem e o rodapé */
+  padding: 10px 10px 12px;                    /* espaçamento interno ao redor do bloco de imagens */
+  border: 1px dashed rgba(37, 99, 235, 0.4);  /* borda tracejada suave para destacar a área de fotos */
+  border-radius: 12px;                        /* cantos arredondados para combinar com o restante do app */
+  background-color: #f9fbff;                  /* fundo mais claro para diferenciar do resto do formulário */
+}
+
+/* Cada linha de imagem (miniatura + campos) */
+.image-row {                                  /* linha que agrupa miniatura e campos da foto */
+  display: flex;                              /* usa flexbox para separar coluna da miniatura e coluna dos campos */
+  flex-wrap: wrap;                            /* permite quebrar em duas linhas em telas menores */
+  gap: 12px;                                  /* espaço entre a coluna da miniatura e a coluna de campos */
+  align-items: flex-start;                    /* alinha topo dos elementos (miniatura e campos) */
+}
+
+/* Coluna da miniatura da imagem */
+.image-thumb-column {                         /* coluna da esquerda, onde fica a miniatura + botão de ampliar */
+  display: flex;                              /* usa flexbox para empilhar miniatura e botão */
+  flex-direction: column;                     /* coloca miniatura em cima e botão embaixo */
+  gap: 6px;                                   /* espaço pequeno entre miniatura e botão de ampliar */
+  flex: 0 0 130px;                            /* largura fixa da coluna de miniatura (não cresce) */
+}
+
+/* Área em que a miniatura da imagem é desenhada */
+.image-thumb-wrapper {                        /* moldura da miniatura (borda e proporção fixa) */
+  width: 120px;                               /* largura da área da miniatura */
+  height: 90px;                               /* altura da área da miniatura (formato mais horizontal) */
+  border-radius: 10px;                        /* cantos arredondados */
+  border: 1px solid var(--nt-border-soft);    /* borda discreta para delimitar o espaço da imagem */
+  overflow: hidden;                           /* corta qualquer parte da imagem que ultrapasse o retângulo */
+  background-color: #e5edff;                  /* fundo claro enquanto não há imagem */
+  display: flex;                              /* centraliza conteúdo (imagem ou placeholder) */
+  align-items: center;                        /* centraliza verticalmente */
+  justify-content: center;                    /* centraliza horizontalmente */
+  position: relative;                         /* permite sobrepor placeholder e imagem se necessário */
+}
+
+/* Imagem em miniatura (caso exista) */
+.image-thumb {                                /* estilo das imagens em miniatura */
+  max-width: 100%;                            /* impede que a imagem ultrapasse a largura do wrapper */
+  max-height: 100%;                           /* impede que a imagem ultrapasse a altura do wrapper */
+  object-fit: cover;                          /* recorta proporcionalmente preenchendo o retângulo */
+  display: none;                              /* começa escondida; será exibida quando houver imagem válida */
+  cursor: pointer;                            /* indica que a imagem é clicável */
+  transition: transform 0.15s ease, box-shadow 0.15s ease; /* animação suave ao hover */
+}
+
+.image-thumb:hover {                          /* efeito ao passar o mouse na miniatura */
+  transform: scale(1.05);                     /* aumenta levemente a imagem */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);  /* sombra para destacar */
+}
+
+/* Placeholder mostrado quando ainda não há imagem */
+.image-thumb-placeholder {                    /* texto central "Prévia não disponível" */
+  font-size: 0.7rem;                          /* fonte pequena para caber dentro da miniatura */
+  color: var(--nt-text-muted);                /* cor mais suave para não chamar tanta atenção */
+  text-align: center;                         /* centraliza o texto dentro do bloco */
+  padding: 4px;                               /* pequeno espaçamento interno para o texto respirar */
+}
+
+/* Coluna dos campos (URL, descrição e botões de ação) */
+.image-fields-column {                        /* coluna da direita com inputs e botões */
+  display: flex;                              /* organiza o conteúdo em coluna */
+  flex-direction: column;                     /* coloca grupos de campos em coluna */
+  gap: 6px;                                   /* espaço vertical entre grupos e ações */
+  flex: 1 1 250px;                            /* ocupa todo o espaço restante com largura mínima confortável */
+}
+
+/* Linha de botões de ação da imagem */
+.image-row-actions {                          /* faixa contendo "Selecionar imagem" e "Abrir câmera" */
+  display: flex;                              /* exibe botões lado a lado */
+  flex-wrap: wrap;                            /* permite quebra de linha em telas menores */
+  gap: 8px;                                   /* espaço entre os botões */
+  margin-top: 2px;                            /* pequeno respiro acima dos botões em relação aos campos */
+}
+
+/* Rodapé da seção de imagens (botão Nova imagem) */
+.image-section-footer {                       /* contêiner do botão "Nova imagem" */
+  display: flex;                              /* usa flexbox para posicionar o botão */
+  justify-content: flex-end;                  /* alinha o botão à direita dentro da área de imagens */
+  margin-top: 4px;                            /* espaço acima do rodapé em relação às linhas de imagem */
+}
+
+/* ==================== [NOVO] LISTA DE IMAGENS EM BLOCO (MOBILE-FRIENDLY) ==================== */
+.image-rows {                                 /* [NOVO] container que empilha linhas (sem tabela) */
+  display: flex;                              /* [NOVO] layout flex */
+  flex-direction: column;                     /* [NOVO] empilha verticalmente */
+  gap: 12px;                                  /* [NOVO] espaçamento entre linhas */
+}
+
+/* ==================== [LEGADO] ESCONDER TABELA ANTIGA DO Q2 SWITCH ==================== */
+.legacy-q2-switch-table {                     /* [LEGADO] tudo que for tabela antiga do switch */
+  display: none !important;                   /* [LEGADO] esconde sem remover do DOM */
+}
+
+/* Botão específico para adicionar novas linhas de imagem */
+.image-add-row-btn {                          /* botão de adicionar nova linha de imagem */
+  min-width: 150px;                           /* largura mínima confortável para o texto */
+}
+
+/* Versão extra-pequena dos botões, para caber melhor perto da miniatura */
+.btn-small {                                  /* variação de tamanho de botão para ações da imagem */
+  padding: 4px 10px;                          /* padding reduzido em relação ao botão padrão */
+  font-size: 0.75rem;                         /* fonte um pouco menor para caber melhor no layout compacto */
+}
+
+/* Ajuste para telas pequenas: linha de imagem vira coluna (miniatura em cima) */
+@media (max-width: 600px) {                   /* regras específicas para celulares */
+  .image-row {                                /* cada linha de imagem em telas pequenas */
+    flex-direction: column;                   /* coloca miniatura em cima e os campos abaixo */
+  }
+
+  .image-thumb-column {                       /* coluna da miniatura neste contexto */
+    flex: 0 0 auto;                           /* libera a largura fixa para se ajustar automaticamente */
+  }
+
+  .image-fields-column {                      /* coluna dos campos em telas pequenas */
+    flex: 1 1 auto;                           /* permite que os campos ocupem toda a largura disponível */
+  }
+
+  .image-section-footer {                     /* rodapé em telas pequenas */
+    justify-content: flex-start;              /* coloca o botão "Nova imagem" alinhado à esquerda */
+  }
+}
+
+label {
+  font-size: 0.8rem;
+  color: var(--nt-text-muted);
+}
+
+input,
+select,
+textarea {
+  border-radius: 10px;
+  border: 1px solid var(--nt-border-soft);
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s;
+  background-color: #ffffff;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--nt-primary);
+  box-shadow: 0 0 0 1px rgba(11, 113, 241, 0.1);
+  background-color: #f0f6ff;
+}
+
+/* ================== LOGIN: CAMPO DE SENHA COM "OLHINHO" ================== */
+.password-field {                               /* wrapper do input + botão */
+  position: relative;                           /* permite botão absoluto dentro */
+  width: 100%;                                  /* ocupa toda a largura */
+}
+
+.password-field input {                         /* input de senha dentro do wrapper */
+  padding-right: 44px;                          /* espaço pro botão não cobrir o texto */
+}
+
+.btn-password-toggle {                          /* botão do "olhinho" */
+  position: absolute;                           /* fica por cima do input */
+  right: 10px;                                  /* encosta à direita */
+  top: 50%;                                     /* centraliza verticalmente */
+  transform: translateY(-50%);                  /* ajuste fino do centro */
+  border: 0;                                    /* remove borda */
+  background: transparent;                      /* sem fundo */
+  padding: 6px;                                 /* área de clique confortável */
+  line-height: 1;                               /* evita desalinhamento */
+  cursor: pointer;                              /* mãozinha */
+  border-radius: 10px;                          /* segue o estilo do app */
+}
+
+.btn-password-toggle:focus {                    /* foco visível no teclado */
+  outline: none;                                /* remove outline padrão */
+  box-shadow: 0 0 0 2px rgba(11, 113, 241, 0.25);/* anel de foco */
+}
+
+.btn-password-toggle .eye-icon {                /* ícone dentro do botão */
+  font-size: 16px;                              /* tamanho do ícone */
+  display: block;                               /* evita espaçamento estranho */
+}
+
+/* ================== LOGIN: AVISO DE CAPS LOCK ================== */
+.caps-warning {                                 /* texto do aviso */
+  margin-top: 6px;                              /* espaço do input */
+  font-size: 0.85rem;                           /* menorzinho */
+  color: #b45309;                               /* âmbar/alerta */
+}
+
+/* Área de feedback (erro/sucesso) abaixo dos formulários */
+.form-feedback {                                /* estilo base dos parágrafos usados para feedback */
+  font-size: 0.8rem;                            /* deixa o texto discreto, mas legível */
+  min-height: 18px;                             /* reserva espaço mesmo quando não há mensagem */
+  margin-bottom: 6px;                           /* afasta visualmente dos botões ou campos abaixo */
+}
+
+.form-error {                                   /* classe genérica de erro (usada também em login, etc.) */
+  font-size: 0.8rem;                            /* mesma escala de texto */
+  color: var(--nt-danger);                      /* cor vermelha padrão para mensagens de erro */
+}
+
+.form-success {                                 /* classe genérica de sucesso */
+  font-size: 0.8rem;                            /* mesma escala de texto */
+  color: var(--nt-success);                     /* cor verde padrão para mensagens de sucesso */
+}
+
+.form-feedback.form-success {                   /* quando o feedback é de sucesso e está em um parágrafo de feedback */
+  background: #ecfdf3;                          /* fundo verde bem clarinho para destacar o aviso */
+  border-radius: 10px;                          /* cantos arredondados combinando com inputs/botões */
+  padding: 6px 10px;                            /* espaço interno ao redor do texto */
+  border: 1px solid rgba(22, 163, 74, 0.25);    /* borda sutil em tom de verde */
+}
+
+.form-feedback.form-error {                     /* quando o feedback é de erro nesse mesmo padrão */
+  background: #fef2f2;                          /* fundo vermelho bem clarinho */
+  border-radius: 10px;                          /* mesmos cantos arredondados */
+  padding: 6px 10px;                            /* mesmo espaçamento interno */
+  border: 1px solid rgba(220, 38, 38, 0.25);    /* borda sutil em tom de vermelho */
+}
+
+/* Rodapé de ações do formulário (botões) */
+.form-actions {                          /* contêiner dos botões na base do formulário */
+  margin-top: 4px;                       /* pequeno espaçamento acima da área de botões */
+  display: flex;                         /* usa flexbox para alinhar os botões em linha */
+  flex-wrap: wrap;
+  gap: 10px;                             /* espaço horizontal entre os botões */
+  /* justify-content: flex-end; */       /* linha original que alinharia à direita (mantida comentada) */
+  justify-content: center;               /* mantém os botões centralizados no formulário */
+}
+
+.form-actions .btn {                     /* estilo aplicado a qualquer botão dentro da área .form-actions */
+  min-width: 140px;                      /* largura mínima para ficar visível e confortável */
+}
+
+.avaliacao-form-title {                          /* contêiner do título "Selecione o tipo de formulário" */
+  margin-top: 14px;                              /* espaço entre os botões (Nova/Salvar) e o título */
+  margin-bottom: 6px;                            /* pequeno espaço entre o título e as abas azuis/cinzas */
+}
+
+.avaliacao-form-title h3 {                       /* estilo específico do texto do título acima das abas */
+  font-size: 1.1rem;                             /* deixa o título um pouco menor para não competir com h2 */
+  font-weight: 600;                              /* mantém destaque, mas sem parecer um título principal */
+  color: #111827;                                /* tom escuro neutro, combinando com o restante dos textos */
+}
+
+/* Abas de seleção de tipo de formulário (redes / infraestrutura) */
+.avaliacao-tabs {                        /* contêiner das abas logo abaixo dos botões do formulário */
+  margin-top: 8px;                       /* espaço entre botões principais e as abas */
+  margin-bottom: 12px;                   /* espaço entre as abas e o cabeçalho do formulário */
+  display: inline-flex;                  /* exibe as abas em linha, ocupando apenas o espaço necessário */
+  gap: 6px;                              /* espaço horizontal entre cada aba */
+  padding: 2px;                          /* pequeno padding interno para dar “respiro” */
+  border-radius: 999px;                  /* bordas bem arredondadas (estilo pílula) */
+  background-color: #e5e7eb;             /* fundo claro para destacar o conjunto de abas */
+  width: max-content;
+}
+
+.avaliacao-tab-btn {                     /* estilo base de cada aba de tipo de formulário */
+  border: none;                          /* remove borda nativa do botão */
+  background: transparent;               /* fundo transparente quando inativo */
+  padding: 6px 12px;                     /* preenchimento interno confortável */
+  font-size: 0.8rem;                     /* fonte levemente menor que a dos botões principais */
+  border-radius: 999px;                  /* deixa o botão também com formato de pílula */
+  cursor: pointer;                       /* cursor de mão para indicar interatividade */
+  color: var(--nt-text-muted);           /* texto com cor mais suave quando inativo */
+  transition: background-color 0.15s ease, color 0.15s ease; /* animação suave nas mudanças de estado */
+}
+
+.avaliacao-tab-btn.active {              /* estado ativo da aba selecionada */
+  background-color: var(--nt-primary);   /* usa a cor principal do sistema de fundo */
+  color: #ffffff;                        /* texto branco para bom contraste */
+}
+
+
+/* ========================== BOTÕES ================================ */
+
+.btn {
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s,
+    color 0.12s;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, var(--nt-primary), #2563eb);
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 35px rgba(37, 99, 235, 0.45);
+}
+
+/* Botão desabilitado no modo offline */
+.btn-disabled-offline {
+  background: #9ca3af !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  box-shadow: none !important;
+}
+
+.btn-disabled-offline:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-secondary {
+  background: #fffbc8;
+  color: #000000;
+}
+
+.btn-secondary:hover {
+  background: rgba(15, 23, 42, 0.3);
+}
+
+/* Botão Exportar PDF desabilitado */
+#btn-exportar-pdf:disabled {
+  background: #9ca3af !important;
+  color: #6b7280 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  border-color: #9ca3af !important;
+}
+
+#btn-exportar-pdf:disabled:hover {
+  background: #9ca3af !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-excluir {
+  background: transparent;
+  color: #ef4444;           /* vermelho */
+  border: 1px solid #fecaca; /* borda rosa clara */
+}
+.btn-excluir:hover {
+  background: #fef2f2;      /* rosa claro */
+  border-color: #ef4444;    /* borda vermelha */
+}
+
+.btn-ghost {
+  background: transparent;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  color: #0f172a;
+  padding-inline: 14px;
+  width: 90px;
+  height: 30px;
+}
+
+.btn-ghost:hover {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+/* ========================== MODAL DE SENHA ======================== */
+.modal-overlay {                               /* overlay escuro que cobre a tela toda */
+    position: fixed;                           /* fixa em relação à janela */
+    inset: 0;                                  /* ocupa toda a área da tela (top/right/bottom/left = 0) */
+    background: rgba(15, 23, 42, 0.55);        /* fundo escurecido semitransparente */
+    display: flex;                             /* usa flexbox para centralizar o modal */
+    align-items: center;                       /* centraliza verticalmente */
+    justify-content: center;                   /* centraliza horizontalmente */
+    z-index: 999;                              /* garante que fique acima do restante da interface */
+}
+
+.modal {                                       /* caixa branca do modal em si */
+    background: #ffffff;                       /* fundo branco */
+    border-radius: 16px;                       /* cantos arredondados */
+    padding: 24px 28px;                        /* espaçamento interno */
+    max-width: 400px;                          /* largura máxima do modal */
+    width: 100%;                               /* ocupa 100% até o máximo definido */
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25); /* sombra suave para destacar o modal */
+}
+
+.modal-title {                                 /* estilo do título do modal */
+    font-size: 20px;                           /* tamanho de fonte maior */
+    font-weight: 600;                          /* peso de fonte semi-negrito */
+    color: #0f172a;                            /* cor escura para boa leitura */
+    margin-bottom: 8px;                        /* espaço abaixo do título */
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.modal-content {
+  position: relative;
+  max-width: 420px;
+  margin: 100px auto;
+  background: var(--nt-card);
+  border-radius: 20px;
+  padding: 20px 18px;
+  box-shadow: var(--nt-shadow-soft);
+}
+
+.modal-content h2 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+  color: var(--nt-primary-dark);
+}
+
+.modal-text {                                  /* parágrafo explicativo do modal */
+    font-size: 14px;                           /* tamanho de fonte padrão pequeno */
+    color: #6b7280;                            /* cor de texto secundária (cinza) */
+    margin-bottom: 16px;                       /* espaço abaixo do texto */
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-label {                                 /* rótulos dos campos do modal */
+    font-size: 13px;                           /* tamanho de fonte dos rótulos */
+    color: #374151;                            /* cor de texto levemente escura */
+}
+
+.modal-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-input {                                 /* campos de entrada do modal */
+    border-radius: 10px;                       /* cantos arredondados */
+    border: 1px solid #d1d5db;                 /* borda cinza clara */
+    padding: 8px 10px;                         /* espaçamento interno do input */
+    font-size: 14px;                           /* tamanho da fonte do input */
+    outline: none;                             /* remove borda padrão azul do navegador */
+}
+
+.modal-input:focus {                           /* estilo quando o campo do modal está focado */
+    border-color: #0b71f1;                     /* borda azul com a cor do sistema */
+    box-shadow: 0 0 0 1px rgba(11, 113, 241, 0.15); /* leve glow azul ao redor */
+}
+
+.modal-error {                                 /* texto de erro dentro do modal */
+    font-size: 13px;                           /* tamanho de fonte pequeno */
+    color: #dc2626;                            /* cor vermelha para erros */
+    margin-top: 4px;                           /* espaço acima da mensagem */
+}
+
+.users-modal {                                /* modal específico usado para a gestão de usuários */
+  max-height: 80vh;                           /* limita a altura total do modal para caber na janela */
+  display: flex;                              /* usa flexbox para organizar o conteúdo interno */
+  flex-direction: column;                     /* empilha os elementos um embaixo do outro */
+  gap: 12px;                                  /* adiciona um pequeno espaçamento vertical entre os blocos */
+}
+
+.users-table-wrapper {                        /* wrapper da tabela dentro do modal de usuários */
+  max-height: 50vh;                           /* limita a altura da tabela para ativar rolagem se a lista for grande */
+}
+
+/* ========================== RESPONSIVIDADE ======================== */
+
+/* Desktop: mantém o “mínimo” antigo só em telas grandes */
+@media (min-width: 1121px) {
+  .card {
+    min-height: 0;
+
+  }
+}
+
+@media (max-width: 1120px) {                          /* aplica estas regras quando a largura da tela for até 1120px
+                                                         (inclui celulares, tablets e janelas de ~50% em monitores grandes) */
+  .main-layout {                                      /* ajusta o layout principal (lista + formulário) */
+    grid-template-columns: minmax(0, 1fr);            /* troca a grade para uma única coluna, empilhando as sections
+                                                         (primeiro "Avaliações registradas", depois "Nova Avaliação") */
+  }
+
+  .card {                                             /* estilo para os cartões em telas menores/médias */
+    min-height: auto;                                 /* remove a altura mínima fixa para o card se adaptar ao conteúdo
+                                                         e evitar espaços em branco desnecessários na pilha vertical */
+  }
+
+  .topbar {                                           /* ajustes da barra superior em telas menores/médias */
+    flex-direction: column;                           /* coloca logo/título e informações do usuário em coluna (um abaixo do outro) */
+    align-items: flex-start;                          /* alinha todos os itens da topbar à esquerda para melhor leitura */
+    gap: 10px;                                        /* adiciona um pequeno espaço vertical entre os blocos da topbar */
+  }
+
+  .user-info {                                        /* bloco que mostra nome e papel do usuário logado */
+    align-items: flex-start;                          /* alinha os textos de usuário/papel à esquerda em vez de à direita */
+  }
+}
+
+
+@media (max-width: 600px) {
+  .form-row {
+    flex-direction: column;
+  }
+
+  .topbar {
+    padding-inline: 16px;
+  }
+}
+
+/* =============== MODAL DE TROCA DE SENHA (LAYOUT FIXO) =============== */
+
+#password-modal-overlay {                       /* overlay que cobre a tela quando o modal está aberto */
+    position: fixed;                            /* fica fixo em relação à janela, não rola com a página */
+    inset: 0;                                   /* ocupa toda a área: top/right/bottom/left = 0 */
+    background: rgba(15, 23, 42, 0.55);         /* fundo escurecido semitransparente */
+    display: flex;                              /* usa flexbox para centralizar o conteúdo */
+    align-items: center;                        /* centraliza verticalmente o conteúdo */
+    justify-content: center;                    /* centraliza horizontalmente o conteúdo */
+    z-index: 999;                               /* garante que fique acima de todo o restante da interface */
+}
+
+#password-modal-overlay.hidden {                /* estado quando o modal está escondido */
+    display: none !important;                   /* some completamente da tela */
+}
+
+.password-modal {                               /* caixinha branca do modal de senha */
+    background: #ffffff;                        /* fundo branco para contraste com o overlay escuro */
+    border-radius: 16px;                        /* cantos arredondados */
+    padding: 24px 28px;                         /* espaçamento interno confortável */
+    max-width: 420px;                           /* largura máxima do modal */
+    width: 100%;                                /* ocupa 100% até atingir o max-width */
+    margin: 0 16px;                             /* respiro nas laterais em telas menores */
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25); /* sombra para destacar do fundo */
+}
+
+.password-modal__title {                        /* título “Trocar senha padrão” */
+    font-size: 20px;                            /* tamanho de fonte maior */
+    font-weight: 600;                           /* semi-negrito */
+    color: #0f172a;                             /* cor de texto escura */
+    margin-bottom: 8px;                         /* espaço abaixo do título */
+}
+
+.password-modal__text {                         /* texto explicativo abaixo do título */
+    font-size: 14px;                            /* fonte um pouco menor */
+    color: #6b7280;                             /* cinza suave (texto secundário) */
+    margin-bottom: 16px;                        /* espaço abaixo do parágrafo */
+}
+
+.password-modal__form {                         /* layout do formulário dentro do modal */
+    display: flex;                              /* usa flexbox */
+    flex-direction: column;                     /* empilha elementos em coluna */
+    gap: 8px;                                   /* espaço entre campos/labels */
+}
+
+.password-modal__label {                        /* rótulos dos campos (Senha atual / Nova senha) */
+    font-size: 13px;                            /* fonte um pouco menor */
+    color: #374151;                             /* cinza escuro */
+}
+
+.password-modal__input {                        /* inputs de senha dentro do modal */
+    border-radius: 10px;                        /* cantos arredondados */
+    border: 1px solid #d1d5db;                  /* borda cinza clara */
+    padding: 8px 10px;                          /* espaçamento interno (altura e largura) */
+    font-size: 14px;                            /* tamanho da fonte do texto digitado */
+    outline: none;                              /* remove o contorno padrão do navegador */
+    width: 100%;                                /* ocupa toda a largura disponível do formulário */
+}
+
+.password-modal__input:focus {                  /* estilo quando o input está em foco */
+    border-color: #0b71f1;                      /* borda azul do sistema */
+    box-shadow: 0 0 0 1px rgba(11, 113, 241, 0.15); /* leve glow azul ao redor */
+}
+
+.password-modal__error {                        /* mensagem de erro no modal (senha incorreta, etc.) */
+    font-size: 13px;                            /* fonte pequena */
+    color: #dc2626;                             /* vermelho (erro) */
+    margin-top: 4px;                            /* pequeno espaço acima do texto */
+}
+
+.password-modal__actions {                      /* container da área dos botões no rodapé do modal */
+    margin-top: 12px;                           /* espaço acima dos botões */
+    display: flex;                              /* usa flexbox */
+    justify-content: flex-end;                  /* alinha o botão à direita */
+}
+
+/* Se quiser deixar o botão do modal com largura total, descomente abaixo */
+
+.password-modal__actions .btn-primary {         /* botão principal dentro do modal */
+    width: 100%;                                /* faz o botão ocupar toda a largura */
+}
+
+/* Linhas da tabela que representam avaliações clicáveis (para abrir em modo de edição) */
+.table tbody tr.avaliacao-row {        /* estiliza apenas as linhas com classe .avaliacao-row */
+  cursor: pointer;                     /* mostra cursor de mão para indicar que a linha é clicável */
+}
+
+.table tbody tr.avaliacao-row.lista-avaliacoes-bloqueada { /* estado visual de bloqueio durante o carregamento da avaliação */
+  pointer-events: none;                /* impede cliques na linha enquanto estiver bloqueada */
+  opacity: 0.6;                        /* reduz a opacidade para indicar que está temporariamente indisponível */
+}
+
+/* Card de gestão de usuários (apenas administradores) */
+.card-users {                            /* card específico para a área de usuários */
+  grid-column: 1 / -1;                   /* faz o card ocupar as duas colunas da grid (linha inteira) */
+}
+
+/* tabela genérica de auditoria, reaproveita para usuários e avaliações */
+.tabela-auditoria th, /* aplica estilos às células de cabeçalho da tabela de auditoria */
+.tabela-auditoria td { /* aplica estilos às células de dados da tabela de auditoria */
+  padding: 6px 8px;          /* define espaçamento interno das células para melhor leitura */
+  font-size: 0.85rem;        /* deixa o texto um pouco menor para caber melhor em telas estreitas */
+  vertical-align: top;       /* alinha o texto ao topo da célula, útil em linhas com textos grandes */
+  word-break: break-word;    /* permite quebrar palavras longas para evitar estouro de coluna */
+  overflow-wrap: anywhere;   /* garante quebra de texto em qualquer ponto, evitando sobreposição */
+}
+
+/* contêiner com rolagem para tabelas de auditoria */
+/* .table-wrapper {              classe usada para envolver as tabelas permitindo rolagem */
+  /* max-height: 260px;          altura máxima fixa do bloco de tabela (ajuste conforme preferir) */
+  /* height: auto; */
+  /* overflow-y: auto;           habilita rolagem vertical se o conteúdo ultrapassar a altura definida */
+  /* overflow-x: auto;           habilita rolagem horizontal caso haja muitas colunas */
+/* } */
+
+/* ==========================
+   Layout específico da aba de auditoria
+   ========================== */
+
+.auditoria-layout {                       /* layout específico para os cards de auditoria */
+  display: grid;                          /* usa grid para posicionar os dois cards lado a lado em telas amplas */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); /* duas colunas proporcionais para cada card */
+  gap: 22px;                              /* espaçamento visual entre os cards */
+}
+
+.card.card-compact {                      /* variação de card mais enxuta, usada na tela de auditoria */
+  min-height: auto;                       /* remove a altura mínima alta e deixa o card acompanhar o conteúdo */
+}
+
+.auditoria-layout .table-wrapper {        /* wrapper de tabela dentro dos cards de auditoria */
+  margin-top: 10px;                       /* separa visualmente a tabela da área de filtros */
+}
+
+/* Container de filtros de auditoria */
+.auditoria-filtros-container {            /* agrupa os blocos de filtros */
+  background: var(--bg-light, #f8f9fa);   /* fundo sutil para destacar área de filtros */
+  border-radius: 8px;                     /* bordas arredondadas */
+  padding: 12px 16px;                     /* espaçamento interno */
+  margin-bottom: 12px;                    /* espaçamento abaixo dos filtros */
+}
+
+.auditoria-filtros-container .form-row {  /* linhas de filtros dentro do container */
+  margin-bottom: 8px;                     /* espaçamento entre linhas de filtros */
+}
+
+.auditoria-filtros-container .form-row:last-child { /* última linha de filtros */
+  margin-bottom: 0;                       /* remove margem inferior na última linha */
+}
+
+.auditoria-filtros-container .form-group { /* grupos de formulário dentro dos filtros */
+  flex: 1;                                /* distribui espaço igualmente */
+  min-width: 150px;                       /* largura mínima dos campos */
+}
+
+.auditoria-filtros-container label {      /* rótulos dentro dos filtros de auditoria */
+  font-size: 0.8rem;                      /* tamanho de fonte menor */
+  color: var(--text-muted, #6c757d);      /* cor mais suave */
+  margin-bottom: 2px;                     /* espaçamento reduzido abaixo do rótulo */
+}
+
+.auditoria-filtros-container input,       /* campos de texto nos filtros */
+.auditoria-filtros-container select {     /* selects nos filtros */
+  height: 36px;                           /* altura padronizada */
+  font-size: 0.85rem;                     /* fonte ligeiramente menor */
+}
+
+/* Texto de ajuda na tabela vazia */
+.text-muted {                             /* classe utilitária para texto cinza */
+  color: var(--text-muted, #6c757d);      /* cor de texto suave */
+}
+
+.text-center {                            /* classe utilitária para centralizar texto */
+  text-align: center;                     /* alinha texto ao centro */
+}
+
+@media (max-width: 1120px) {              /* comportamento para telas médias/pequenas */
+  .auditoria-layout {                     /* ajusta o layout da aba de auditoria em telas menores */
+    grid-template-columns: minmax(0, 1fr);/* empilha os dois cards, um abaixo do outro */
+  }
+}
+
+/* ==========================
+   Tabela "Lista de materiais (Infraestrutura)"
+   ========================== */
+
+#infra-lista-materiais-tabela {                      /* tabela específica da lista de materiais de infraestrutura */
+  width: 100%;                                       /* faz a tabela ocupar toda a largura do wrapper */
+  table-layout: fixed;                               /* distribui as colunas de forma mais uniforme e previsível */
+  font-size: 0.8rem;                                 /* deixa a fonte um pouco menor para caber mais conteúdo */
+}
+
+#infra-lista-materiais-tabela th,
+#infra-lista-materiais-tabela td {                   /* células de cabeçalho e corpo dessa tabela específica */
+  white-space: normal;                               /* permite quebra de linha em títulos/textos longos */
+  word-break: break-word;                            /* quebra palavras grandes para não estourar a coluna */
+  padding: 6px 8px;                                  /* reduz o espaçamento interno para uma aparência mais compacta */
+}
+
+#infra-lista-materiais-tabela th:nth-child(1),
+#infra-lista-materiais-tabela td:nth-child(1) {      /* coluna "Equipamento / material" */
+  width: 40%;                                        /* fica com a maior fatia, pois tem textos mais longos */
+}
+
+#infra-lista-materiais-tabela th:nth-child(2),
+#infra-lista-materiais-tabela td:nth-child(2) {      /* coluna "Modelo" */
+  width: 26%;                                        /* largura intermediária para descrição de modelo */
+}
+
+#infra-lista-materiais-tabela th:nth-child(3),
+#infra-lista-materiais-tabela td:nth-child(3) {      /* coluna "Quantidade" */
+  width: 12%;                                        /* bem estreita, suficiente para números pequenos */
+  text-align: center;                                /* centraliza os valores numéricos para leitura rápida */
+}
+
+#infra-lista-materiais-tabela th:nth-child(4),
+#infra-lista-materiais-tabela td:nth-child(4) {      /* coluna "Fabricante" */
+  width: 22%;                                        /* usa o espaço restante para o fabricante */
+}
+
+#infra-lista-materiais-tabela input {                /* campos de texto/número dentro da tabela */
+  width: 100%;                                       /* input acompanha toda a largura da célula */
+  font-size: 0.8rem;                                 /* mantém a fonte consistente com a tabela */
+  padding-block: 6px;                                /* um pouco menos de altura que os inputs padrão */
+}
+
+/* Área de ações logo abaixo da tabela */
+
+.lista-materiais-acoes {                             /* contêiner do botão "Nova linha" */
+  margin-top: 8px;                                   /* respiro entre a tabela e o botão */
+  display: flex;                                     /* usa flexbox para controlar alinhamento interno */
+  justify-content: flex-end;                         /* alinha o botão à direita em telas grandes */
+}
+
+.lista-materiais-acoes .btn {                        /* botão "Nova linha" em si */
+  min-width: 120px;                                  /* largura mínima confortável para clique/toque */
+}
+
+/* Ajustes extras para telas menores */
+
+@media (max-width: 768px) {                          /* regras específicas para tablets e celulares */
+  #infra-lista-materiais-tabela {                    /* tabela em telas pequenas */
+    font-size: 0.75rem;                              /* reduz um pouco mais a fonte */
+  }
+
+  #infra-lista-materiais-tabela th,
+  #infra-lista-materiais-tabela td {                 /* células da tabela em telas pequenas */
+    padding: 4px 6px;                                /* padding menor para caber melhor na horizontal */
+  }
+
+  #infra-lista-materiais-tabela input {              /* inputs da tabela em telas pequenas */
+    font-size: 0.75rem;                              /* acompanha a redução da fonte da tabela */
+    padding-block: 4px;                              /* inputs mais baixinhos para diminuir a altura das linhas */
+  }
+
+  .lista-materiais-acoes {                           /* área do botão no mobile */
+    justify-content: center;                         /* centraliza o botão (mais amigável para o polegar) */
+  }
+}
+
+/* ==================== MODAL DE CÂMERA (GETUSERMEDIA) ==================== */ /* seção do modal de câmera embutida */
+.camera-modal {                                   /* contêiner raiz do modal de câmera */
+  position: fixed;                                /* fixa o modal na viewport */
+  inset: 0;                                       /* ocupa tela inteira */
+  display: none;                                  /* começa escondido */
+  align-items: center;                            /* centraliza verticalmente */
+  justify-content: center;                        /* centraliza horizontalmente */
+  z-index: 10000;                                 /* acima do restante da UI */
+}
+
+.camera-modal.open {                               /* estado visível do modal */
+  display: flex;                                   /* exibe e centraliza conteúdo */
+}
+
+.camera-backdrop {                                 /* fundo escuro clicável */
+  position: absolute;                              /* cobre toda a tela */
+  inset: 0;                                        /* top/right/bottom/left = 0 */
+  background: rgba(0, 0, 0, 0.65);                 /* escurece atrás do modal */
+}
+
+.camera-content {                                  /* caixa do conteúdo do modal */
+  position: relative;                              /* acima do backdrop */
+  width: min(720px, 92vw);                         /* largura responsiva */
+  background: #0f172a;                             /* fundo escuro (combina com tema) */
+  border: 1px solid rgba(255, 255, 255, 0.10);     /* borda sutil */
+  border-radius: 14px;                             /* cantos arredondados */
+  padding: 14px;                                   /* espaçamento interno */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);     /* sombra suave */
+}
+
+.camera-header {                                   /* topo do modal */
+  display: flex;                                   /* título + botão lado a lado */
+  align-items: center;                             /* alinha verticalmente */
+  justify-content: space-between;                  /* separa título e fechar */
+  gap: 10px;                                       /* espaço entre itens */
+  margin-bottom: 10px;                             /* separa do vídeo */
+}
+
+.camera-title {                                    /* título do modal */
+  margin: 0;                                       /* remove margem padrão */
+  font-size: 1.05rem;                              /* tamanho confortável */
+  font-weight: 700;                                /* destaque */
+  color: #e5e7eb;                                  /* texto claro */
+}
+
+.camera-video {                                    /* vídeo do preview da câmera */
+  width: 100%;                                     /* ocupa toda a largura */
+  max-height: 62vh;                                /* evita estourar a tela */
+  border-radius: 12px;                             /* cantos arredondados */
+  background: #000;                                /* fundo preto enquanto carrega */
+  object-fit: cover;                               /* preenche mantendo corte bonito */
+}
+
+.camera-canvas {                                   /* canvas usado na captura */
+  display: none;                                   /* fica oculto (apenas para processamento) */
+}
+
+.camera-actions {                                  /* área de botões */
+  display: flex;                                   /* layout flex */
+  justify-content: flex-end;                       /* alinha botão à direita */
+  gap: 10px;                                       /* espaço entre botões */
+  margin-top: 12px;                                /* separa do vídeo */
+}
+
+/* ==================== MODAL DE PRÉVIA DE IMAGEM ==================== */
+.image-preview-modal {                           /* contêiner raiz do modal de imagem */
+  position: fixed;                               /* fixa o modal em relação à janela do navegador */
+  inset: 0;                                      /* ocupa toda a área visível (topo, direita, baixo, esquerda = 0) */
+  display: none;                                 /* começa escondido; será exibido quando ganhar a classe .open */
+  align-items: center;                           /* centraliza verticalmente o conteúdo interno */
+  justify-content: center;                       /* centraliza horizontalmente o conteúdo interno */
+  z-index: 9999;                                 /* coloca o modal acima de quase todos os outros elementos */
+}
+
+.image-preview-modal.open {                      /* estado em que o modal deve ficar visível */
+  display: flex;                                 /* exibe o modal usando flexbox, centralizando o conteúdo */
+}
+
+.image-preview-backdrop {                        /* camada de fundo escurecida atrás do conteúdo do modal */
+  position: absolute;                            /* posiciona o fundo em relação ao contêiner do modal */
+  inset: 0;                                      /* cobre toda a área do modal */
+  background-color: rgba(0, 0, 0, 0.55);         /* fundo preto translúcido para dar efeito de overlay */
+}
+
+.image-preview-content {                         /* caixa branca central com a imagem e a legenda */
+  position: relative;                            /* permite posicionar o botão de fechar dentro desta caixa */
+  background-color: #ffffff;                     /* fundo branco para destacar a imagem */
+  border-radius: 12px;                           /* cantos arredondados para combinar com os cards do app */
+  padding: 16px 16px 12px;                       /* espaçamento interno ao redor do conteúdo */
+  max-width: 90vw;                               /* limita a largura máxima a 90% da largura da viewport */
+  max-height: 90vh;                              /* limita a altura máxima a 90% da altura da viewport */
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.35);/* sombra forte para dar sensação de sobreposição */
+  display: flex;                                 /* organiza os elementos internos em coluna */
+  flex-direction: column;                        /* empilha a imagem e a legenda verticalmente */
+  gap: 8px;                                      /* espaço entre o botão, a imagem e a legenda */
+}
+
+.image-preview-close {                           /* botão de fechar (ícone X) no canto superior direito do modal */
+  position: absolute;                            /* posiciona relativamente ao contêiner de conteúdo */
+  top: 6px;                                      /* distância do topo da caixa de conteúdo */
+  right: 8px;                                    /* distância da borda direita da caixa de conteúdo */
+  border: none;                                  /* remove borda padrão do botão */
+  background: transparent;                       /* deixa o fundo do botão transparente */
+  font-size: 1.4rem;                             /* tamanho do ícone X para ficar bem visível */
+  cursor: pointer;                               /* mostra o cursor de mãozinha ao passar por cima */
+  color: #4b5563;                                /* cor cinza escuro para o ícone X */
+}
+
+.image-preview-close:hover {                     /* estilo do botão de fechar quando o mouse passa por cima */
+  color: #111827;                                /* escurece um pouco a cor para indicar interação */
+}
+
+.image-preview-img {                             /* imagem ampliada exibida no modal */
+  max-width: 80vw;                               /* limita a largura da imagem para caber na tela */
+  max-height: 70vh;                              /* limita a altura da imagem para caber confortavelmente */
+  object-fit: contain;                           /* redimensiona a imagem sem distorcer, mantendo proporções */
+  border-radius: 8px;                            /* cantos levemente arredondados */
+}
+
+.image-preview-caption {                         /* texto de descrição da imagem, logo abaixo da foto */
+  font-size: 0.85rem;                            /* tamanho de fonte um pouco menor que o padrão */
+  color: #4b5563;                                /* cor de texto cinza médio */
+  margin-top: 2px;                               /* pequeno espaço acima da legenda */
+  max-width: 80vw;                               /* impede que a legenda fique mais larga que a imagem */
+  word-wrap: break-word;                         /* permite quebra de palavras longas na legenda */
+}
+
+/* ==================== LOADING SPINNER ==================== */
+
+/* [NOVO] Animação de rotação contínua para o spinner */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* [NOVO] Estilo do botão quando está em estado de loading */
+.btn-loading {
+  position: relative;                            /* permite posicionar o spinner internamente */
+  pointer-events: none;                          /* impede cliques durante o carregamento */
+  opacity: 0.85;                                 /* levemente transparente para indicar estado */
+}
+
+/* [NOVO] Spinner circular dentro do botão */
+.btn-loading .btn-spinner {
+  display: inline-block;                         /* exibe inline com o texto */
+  width: 16px;                                   /* largura do spinner */
+  height: 16px;                                  /* altura do spinner */
+  margin-right: 8px;                             /* espaço entre spinner e texto */
+  border: 2px solid rgba(255, 255, 255, 0.3);    /* borda externa semitransparente */
+  border-top-color: #ffffff;                     /* parte visível do spinner (branca) */
+  border-radius: 50%;                            /* forma circular */
+  animation: spin 0.8s linear infinite;          /* animação de rotação contínua */
+  vertical-align: middle;                        /* alinha verticalmente com o texto */
+}
+
+/* [NOVO] Overlay de loading para o formulário inteiro (opcional) */
+.form-loading-overlay {
+  position: absolute;                            /* posicionamento absoluto sobre o formulário */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);          /* fundo branco semitransparente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;                                  /* garante que fique acima do conteúdo */
+  border-radius: var(--nt-radius-lg);            /* segue o raio do card */
+}
+
+/* [NOVO] Spinner grande para overlay */
+.spinner-large {
+  width: 40px;                                   /* tamanho maior */
+  height: 40px;
+  border: 4px solid var(--nt-border-soft);       /* borda externa cinza */
+  border-top-color: var(--nt-primary);           /* parte visível azul */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* ==========================
+   Filtros de Avaliações Registradas
+   ========================== */
+
+.card-header-actions {                           /* container para botões no header do card */
+  display: flex;
+  gap: 8px;                                      /* espaço entre botões */
+  align-items: center;
+}
+
+.btn-active {                                    /* estado ativo do botão de filtros */
+  background-color: var(--nt-primary, #0d6efd) !important;
+  color: #fff !important;
+  border-color: var(--nt-primary, #0d6efd) !important;
+}
+
+.filtros-avaliacoes-container {                  /* container principal dos filtros */
+  background: var(--bg-light, #f8f9fa);          /* fundo sutil */
+  border-radius: 8px;
+  padding: 16px;
+  margin: 0 0 16px 0;                            /* espaço abaixo dos filtros */
+  border: 1px solid var(--nt-border-soft, #dee2e6);
+}
+
+.filtros-avaliacoes-grid {                       /* grid de campos de filtro */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* colunas responsivas */
+  gap: 12px 16px;                                /* espaço entre campos */
+}
+
+.filtros-avaliacoes-grid .form-group {           /* grupos de formulário nos filtros */
+  margin-bottom: 0;                              /* remove margem padrão */
+}
+
+.filtros-avaliacoes-grid label {                 /* labels nos filtros */
+  font-size: 0.8rem;                             /* fonte menor */
+  color: var(--text-muted, #6c757d);             /* cor suave */
+  margin-bottom: 4px;
+  display: block;
+}
+
+.filtros-avaliacoes-grid input,
+.filtros-avaliacoes-grid select {                /* inputs e selects nos filtros */
+  height: 36px;                                  /* altura compacta */
+  font-size: 0.85rem;                            /* fonte menor */
+}
+
+.filtros-avaliacoes-actions {                    /* linha de botões de ação dos filtros */
+  display: flex;
+  justify-content: flex-end;                     /* alinha à direita */
+  gap: 12px;                                     /* espaço entre botões */
+  margin-top: 16px;                              /* espaço acima */
+  padding-top: 12px;
+  border-top: 1px solid var(--nt-border-soft, #dee2e6); /* linha separadora */
+}
+
+@media (max-width: 768px) {
+  .filtros-avaliacoes-grid {
+    grid-template-columns: 1fr;                  /* uma coluna em mobile */
+  }
+  
+  .filtros-avaliacoes-actions {
+    flex-direction: column;                      /* botões empilhados em mobile */
+  }
+  
+  .filtros-avaliacoes-actions .btn {
+    width: 100%;                                 /* botões full width */
+  }
+}
+
+/* ================== SELECT DE ROLE NA TABELA DE USUÁRIOS ================== */
+.select-role-usuario {
+  padding: 4px 8px;                              /* padding compacto */
+  font-size: 0.8rem;                             /* texto menor */
+  border-radius: 6px;                            /* bordas arredondadas */
+  border: 1px solid var(--nt-border-soft);       /* borda suave */
+  background-color: #fff;                        /* fundo branco */
+  cursor: pointer;                               /* cursor de ponteiro */
+  min-width: 120px;                              /* largura mínima */
+}
+
+.select-role-usuario:focus {
+  border-color: var(--nt-primary);               /* borda azul ao focar */
+  box-shadow: 0 0 0 1px rgba(11, 113, 241, 0.1); /* sombra suave */
+}
+
+.select-role-usuario:disabled {
+  background-color: #f0f0f0;                     /* fundo cinza quando desabilitado */
+  color: #999;                                   /* texto cinza */
+  cursor: not-allowed;                           /* cursor de bloqueio */
+}
+
+/* ================== BADGE "NOVA" PARA AVALIAÇÕES ================== */
+.badge-nova {
+  display: inline-block;
+  padding: 2px 6px;                              /* padding compacto */
+  margin-left: 6px;                              /* espaço do código */
+  font-size: 0.65rem;                            /* texto pequeno */
+  font-weight: 600;                              /* negrito */
+  text-transform: uppercase;                     /* maiúsculas */
+  color: #fff;                                   /* texto branco */
+  background: linear-gradient(135deg, #22c55e, #16a34a);  /* verde gradiente */
+  border-radius: 4px;                            /* bordas arredondadas */
+  vertical-align: middle;                        /* alinhamento vertical */
+  animation: pulse-nova 2s ease-in-out infinite; /* animação pulsante */
+}
+
+@keyframes pulse-nova {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.05); }
+}
+
+.avaliacao-nova {
+  background-color: rgba(34, 197, 94, 0.08) !important;  /* fundo verde suave */
+}
+
+.avaliacao-nova:hover {
+  background-color: rgba(34, 197, 94, 0.15) !important;  /* fundo verde mais forte no hover */
+}
+
+/* ================== CAMPO SOMENTE LEITURA (AVALIADOR) ================== */
+.campo-somente-leitura {
+  background-color: #f0f0f0 !important;          /* fundo cinza */
+  color: #666 !important;                        /* texto cinza escuro */
+  cursor: not-allowed !important;                /* cursor de bloqueio */
+  opacity: 0.8;                                  /* levemente transparente */
+}
+
+/* ================== DROPDOWN SELECTOR PARA TIPO DE FORMULÁRIO ================== */
+
+.form-tipo-selector-container {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.tipo-selector-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  color: #1e293b;
+}
+
+.tipo-selector-dropdown {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.625rem 0.875rem;
+  font-size: 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.tipo-selector-dropdown:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ================== CLASSES DE VISIBILIDADE POR TIPO DE FORMULÁRIO ================== */
+.tipo-redes-cameras-comum {
+  /* Seções comuns entre Redes e Câmeras (Q1, Q2) - visibilidade controlada por JavaScript */
+}
+
+.tipo-redes-only {
+  /* Seções específicas de UTP e Fibra Óptica (Q3) - visibilidade controlada por JavaScript */
+}
+
+.tipo-camera-only {
+  /* Seções específicas de Câmeras (Q4) - visibilidade controlada por JavaScript */
+}
+
+.tipo-ca-only {
+  /* Seções específicas de Controle de Acesso (Q9, Q10) - visibilidade controlada por JavaScript */
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Q9 - Tabela de Materiais do Painel de Automação */
+#q9-materiais-painel-tabela {                      /* tabela específica da lista de materiais do painel (Q9) */
+  width: 100%;                                       /* faz a tabela ocupar toda a largura do wrapper */
+  table-layout: fixed;                               /* distribui as colunas de forma mais uniforme e previsível */
+  font-size: 0.8rem;                                 /* deixa a fonte um pouco menor para caber mais conteúdo */
+}
+
+#q9-materiais-painel-tabela th,
+#q9-materiais-painel-tabela td {                    /* células de cabeçalho e corpo dessa tabela específica */
+  white-space: normal;                               /* permite quebra de linha em títulos/textos longos */
+  word-break: break-word;                            /* quebra palavras grandes para não estourar a coluna */
+  padding: 6px 8px;                                  /* espaçamento interno para melhor legibilidade */
+}
+
+#q9-materiais-painel-tabela th:nth-child(1),
+#q9-materiais-painel-tabela td:nth-child(1) {       /* coluna "Componente" */
+  width: 35%;                                        /* largura para o nome do componente */
+}
+
+#q9-materiais-painel-tabela th:nth-child(2),
+#q9-materiais-painel-tabela td:nth-child(2) {       /* coluna "Modelo" */
+  width: 30%;                                        /* largura para descrição do modelo */
+}
+
+#q9-materiais-painel-tabela th:nth-child(3),
+#q9-materiais-painel-tabela td:nth-child(3) {       /* coluna "Quantidade" */
+  width: 15%;                                        /* bem estreita, suficiente para números pequenos */
+  text-align: center;                                /* centraliza os valores numéricos para leitura rápida */
+}
+
+#q9-materiais-painel-tabela th:nth-child(4),
+#q9-materiais-painel-tabela td:nth-child(4) {       /* coluna "Fabricante" */
+  width: 20%;                                        /* usa o espaço restante para o fabricante */
+}
+
+#q9-materiais-painel-tabela input {                  /* campos de texto/número dentro da tabela */
+  width: 100%;                                       /* input acompanha toda a largura da célula */
+  font-size: 0.8rem;                                 /* mantém a fonte consistente com a tabela */
+  padding-block: 4px;                                /* espaçamento vertical compacto */
+}
+
+/* Ajustes extras para telas menores */
+
+@media (max-width: 768px) {                          /* regras específicas para tablets e celulares */
+  #q9-materiais-painel-tabela {                      /* tabela em telas pequenas */
+    font-size: 0.75rem;                              /* reduz a fonte no mobile */
+  }
+
+  #q9-materiais-painel-tabela th,
+  #q9-materiais-painel-tabela td {                   /* células da tabela em telas pequenas */
+    padding: 4px 6px;                                /* padding menor para caber melhor na horizontal */
+  }
+
+  #q9-materiais-painel-tabela input {                /* inputs da tabela em telas pequenas */
+    font-size: 0.75rem;                              /* acompanha a redução da fonte da tabela */
+    padding-block: 3px;                              /* inputs mais baixinhos para diminuir a altura das linhas */
+  }
+}
